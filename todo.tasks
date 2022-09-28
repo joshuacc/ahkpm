@@ -1,0 +1,19 @@
+☐ Set up magefile
+  ✔ Build @done(22-09-28 12:24)
+  ✔ Lint @done(22-09-28 14:36)
+  ☐ Format
+☐ Set up VS Code config
+☐ Set up test coverage requirements
+☐ Set up GitHub actions to run magefile
+☐ ahkpm init
+☐ ahkpm install multiple files from git
+  ☐ Record to modules file
+  ☐ Download file
+☐ Handle download failures
+  ☐ Due to name clashes
+  ☐ http errors
+☐ Detecting latest version
+☐ Write readme
+  ☐ Overview
+  ☐ Installation
+  ☐ Usage
