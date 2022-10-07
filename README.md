@@ -8,7 +8,7 @@ The [AutoHotKey][ahk] package manager - a work in progress
 - [ ] `ahkpm install github.com/user/repo`: Installs a package (other hosts to come later)
 - [ ] `ahkpm update <name>`: Updates installed packages to the newest version
 - [ ] `ahkpm list`: List local packages and their installed versions
-- [ ] `ahkpm help`: Provides documentation
+- [x] `ahkpm help`: Provides documentation
 - [ ] `ahkpm selfupdate`: Upgrade to the latest version of ahkpm
 
 Install an AutoHotKey script (or scripts) from GitHub: `ahkpm github.com/user/repo`

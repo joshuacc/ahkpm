@@ -7,6 +7,7 @@
 ☐ Set up GitHub actions to run magefile
 ✔ Integrate cli library @done(22-09-29 12:06)
 ☐ ahkpm init
+☐ Add ahkVersion to ahkpm.json
 ☐ ahkpm install multiple files from git
   ☐ Record to modules file
   ☐ Download file
