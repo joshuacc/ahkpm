@@ -1,6 +1,9 @@
-# ahkpm
+# ahkpm - The AutoHotKey Package Manager.
 
-The [AutoHotKey][ahk] package manager - a work in progress
+[AutoHotKey][ahk] is a powerful tool for scripting automations on Windows,
+but managing dependencies for your scripts is painful.
+`ahkpm` intends to bring modern package management to AutoHotkey,
+making it easier than ever to automate away the drudgery.
 
 ## Commands
 
@@ -17,12 +20,21 @@ Install an AutoHotKey script (or scripts) from GitHub: `ahkpm github.com/user/re
 
 ```json
 {
-    "name": "my-project",
-    "git": "github.com/user/my-project",
-    "website": "https://my-project-website.com",
-    "dependencies": {
-        "github.com/user/repo": "tag or commit hash"
-    }
+  "name": "my-project",
+  "version": "0.0.1",
+  "description": "A brief description",
+  "repository": "github.com/user/my-project",
+  "website": "example.com",
+  "license": "MIT",
+  "issueTracker": "github.com/user/my-project/issues",
+  "author": {
+    "name": "joshuacc",
+    "email": "",
+    "website": "joshuaclanton.dev"
+  },
+  "dependencies": {
+    "github.com/user/repo": "branch, tag or commit hash"
+  }
 }
 ```
 

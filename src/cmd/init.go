@@ -113,7 +113,7 @@ var initCmd = &cobra.Command{
 				prompt.OptionInitialBufferText(packageSpec.Author.Website),
 			)
 
-			jsonBytes, err := json.MarshalIndent(packageSpec, "", "  ")
+			jsonBytes, err = json.MarshalIndent(packageSpec, "", "  ")
 			if err != nil {
 				return
 			}
