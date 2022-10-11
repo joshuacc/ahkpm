@@ -4,7 +4,6 @@ import (
 	data "ahkpm/src/data"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/mail"
 	"net/url"
 	"os"
@@ -61,7 +60,7 @@ var initCmd = &cobra.Command{
 
 		var jsonBytes []byte
 
-		for true {
+		for {
 			packageSpec.Name = showPrompt(
 				"What is the name of your package?",
 				validateNothing,
@@ -86,7 +85,7 @@ var initCmd = &cobra.Command{
 				if err == nil && string(out) == "true\n" {
 					originUrl, err := exec.Command("git", "remote", "get-url", "origin").Output()
 					if err == nil && string(originUrl) != "" {
-						re, err := regexp.Compile("(github\\.com.+)\\.git")
+						re, err := regexp.Compile(`(github\.com.+)\.git`)
 						if err != nil {
 							panic(err)
 						}
@@ -192,7 +191,10 @@ var initCmd = &cobra.Command{
 			fmt.Println("")
 		}
 
-		ioutil.WriteFile("ahkpm.json", jsonBytes, 0644)
+		err = os.WriteFile("ahkpm.json", jsonBytes, 0644)
+		if err != nil {
+			panic(err)
+		}
 	},
 }
 
@@ -207,7 +209,7 @@ func showPrompt(promptMessage string, validate Validator, options ...prompt.Opti
 
 	result := ""
 
-	for true {
+	for {
 		fmt.Println(promptMessage)
 		result = prompt.Input("> ", noSuggestionsCompleter, options...)
 		fmt.Println("")
@@ -293,19 +295,6 @@ func buildValidatorFromList(options []string) Validator {
 			return true, ""
 		}
 		return false, "That is not a valid option"
-	}
-}
-
-func buildMultiValidator(validators []Validator) Validator {
-	return func(value string) (bool, string) {
-		for _, validate := range validators {
-			isValid, message := validate(value)
-			if !isValid {
-				return false, message
-			}
-		}
-
-		return true, ""
 	}
 }
 
