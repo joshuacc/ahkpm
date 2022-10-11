@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -61,7 +62,6 @@ var initCmd = &cobra.Command{
 		var jsonBytes []byte
 
 		for true {
-			// TODO: use current directory name as default
 			packageSpec.Name = showPrompt(
 				"What is the name of your package?",
 				validateNothing,
@@ -80,7 +80,22 @@ var initCmd = &cobra.Command{
 				prompt.OptionInitialBufferText(packageSpec.Description),
 			)
 
-			// TODO: Look in git config for default
+			// If we're in a git repository, extract the repository url
+			if packageSpec.Repository == "" {
+				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
+				if err == nil && string(out) == "true\n" {
+					originUrl, err := exec.Command("git", "remote", "get-url", "origin").Output()
+					if err == nil && string(originUrl) != "" {
+						re, err := regexp.Compile("(github\\.com.+)\\.git")
+						if err != nil {
+							panic(err)
+						}
+						domainAndPath := re.FindSubmatch(originUrl)[1]
+						packageSpec.Repository = "https://" + string(domainAndPath)
+					}
+				}
+			}
+
 			packageSpec.Repository = showPrompt(
 				"What is the URL of the package's git repository? (optional)",
 				makeOptional(validateGitHub),
@@ -115,21 +130,40 @@ var initCmd = &cobra.Command{
 				prompt.OptionInitialBufferText(packageSpec.License),
 			)
 
-			// TODO: use git config author as default
+			// If we're in a git repository, extract the user's name to use as default
+			if packageSpec.Author.Name == "" {
+				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
+				if err == nil && string(out) == "true\n" {
+					userName, err := exec.Command("git", "config", "--get", "user.name").Output()
+					if err == nil && string(userName) != "" {
+						packageSpec.Author.Name = strings.Replace(string(userName), "\n", "", -1)
+					}
+				}
+			}
+
 			packageSpec.Author.Name = showPrompt(
 				"What is the author's name/alias? (optional)",
 				validateNothing,
 				prompt.OptionInitialBufferText(packageSpec.Author.Name),
 			)
 
-			// TODO: use git config email as default
+			// If we're in a git repository, extract the user's name to use as default
+			if packageSpec.Author.Email == "" {
+				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
+				if err == nil && string(out) == "true\n" {
+					email, err := exec.Command("git", "config", "--get", "user.email").Output()
+					if err == nil && string(email) != "" {
+						packageSpec.Author.Email = strings.Replace(string(email), "\n", "", -1)
+					}
+				}
+			}
+
 			packageSpec.Author.Email = showPrompt(
 				"What is the author's email address? (optional)",
 				makeOptional(validateEmail),
 				prompt.OptionInitialBufferText(packageSpec.Author.Email),
 			)
 
-			// TODO: use git config author as default
 			packageSpec.Author.Website = showPrompt(
 				"What is the author's website? (optional)",
 				makeOptional(validateUrl),
