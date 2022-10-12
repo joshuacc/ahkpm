@@ -1,4 +1,4 @@
-name: Go
+name: mage
 on: [pull_request]
 
 jobs:
@@ -13,7 +13,8 @@ jobs:
           go-version: '1.19.x'
       - name: Install dependencies
         run: go get .
-      - name: Build
-        run: go build -v -o bin/ahkpm.exe ./src
-      # - name: Test with the Go CLI
-      #   run: go test
+      - name: Run Mage
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: ciVerify
