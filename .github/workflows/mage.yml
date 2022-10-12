@@ -3,6 +3,7 @@ on: [pull_request]
 
 jobs:
   build:
+    name: mage build
     runs-on: windows-latest
 
     steps:
