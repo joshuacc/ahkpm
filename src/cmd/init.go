@@ -209,7 +209,7 @@ func showPrompt(promptMessage string, validate Validator, options ...prompt.Opti
 
 	result := ""
 
-	for true {
+	for {
 		fmt.Println(promptMessage)
 		result = prompt.Input("> ", noSuggestionsCompleter, options...)
 		fmt.Println("")
