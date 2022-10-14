@@ -16,8 +16,23 @@ var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Installs the specified package",
 	Run: func(cmd *cobra.Command, args []string) {
+		cwd, err := os.Getwd()
+		if err != nil {
+			utils.Exit("Error getting current directory")
+		}
+
+		ahkpmFileExists, err := exists(cwd + `\ahkpm.json`)
+		if err != nil {
+			utils.Exit("Error checking if ahkpm.json exists")
+		}
+
+		if !ahkpmFileExists {
+			fmt.Println("ahkpm.json not found in current directory. Run `ahkpm init` to create one.")
+			os.Exit(1)
+		}
+
 		if len(args) == 0 {
-			// TODO: install all packages
+			// TODO: install all packages in ahkpm.json
 			fmt.Println("Please specify a package to install")
 			return
 		}
@@ -66,52 +81,52 @@ func installSinglePackage(packageName string, version Version) {
 
 	packageCacheDir := cacheDir + `\` + packageName
 
-	os.MkdirAll(packageCacheDir, os.ModePerm)
+	err := os.MkdirAll(packageCacheDir, os.ModePerm)
+	if err != nil {
+		utils.Exit("Error creating package cache directory")
+	}
 
 	packageWasCloned, err := exists(packageCacheDir + `\.git`)
 	if err != nil {
-		fmt.Println("Error checking if package was cloned", err)
-		os.Exit(1)
+		utils.Exit("Error checking if package was cloned")
 	}
 
 	if !packageWasCloned {
 		// Clone the repository into the cache directory
 		_, err := git.PlainClone(packageCacheDir, false, &git.CloneOptions{URL: getGitUrl(packageName)})
 		if err != nil {
-			fmt.Println("Error cloning package", err)
-			os.Exit(1)
+			utils.Exit("Error cloning package")
 		}
 	} else {
 		// Checkout the specified version
 		repo, err := git.PlainOpen(packageCacheDir)
 		if err != nil {
-			fmt.Println("Error opening package", err)
-			os.Exit(1)
+			utils.Exit("Error opening package")
 		}
 
 		worktree, err := repo.Worktree()
 		if err != nil {
-			fmt.Println("Error getting worktree", err)
-			os.Exit(1)
+			utils.Exit("Error getting worktree")
 		}
 
 		err = worktree.Checkout(&git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)})
 		if err != nil {
-			fmt.Println("Error checking out version", err)
-			os.Exit(1)
+			utils.Exit("Error checking out version")
 		}
 	}
 
 	// Copy files from the package cache to the target module directory
 	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Error getting current directory", err)
-		os.Exit(1)
+		utils.Exit("Error getting current directory")
 	}
 
 	targetModuleDir := cwd + `\ahkpm-modules\` + packageName
 
-	copy.Copy(packageCacheDir, targetModuleDir)
+	err = copy.Copy(packageCacheDir, targetModuleDir)
+	if err != nil {
+		utils.Exit("Error copying package to target module directory")
+	}
 
 	// TODO: Add the installed package to ahkpm.json's dependencies list
 	// TODO: Create/update a lockfile
