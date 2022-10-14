@@ -62,10 +62,9 @@ func init() {
 }
 
 // Installs a single package. For now only support installing an exact version
-// TODO: Support no version specified
+// TODO: Support omitting version specifier
 // TODO: Support version ranges
 // TODO: Support branch names
-// TODO: Support git tags
 // TODO: Support git commits
 func installSinglePackage(packageName string, version Version) {
 	fmt.Println("Installing package", packageName, "with", strings.ToLower(string(version.Kind)), version.Value)
