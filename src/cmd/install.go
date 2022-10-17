@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"ahkpm/src/core"
 	utils "ahkpm/src/utils"
 	"fmt"
 	"os"
@@ -51,7 +52,7 @@ var installCmd = &cobra.Command{
 			versionSpecifier = splitArg[1]
 		}
 
-		version := getVersion(versionSpecifier)
+		version := core.Version{}.FromString(versionSpecifier)
 
 		installSinglePackage(packageToInstall, version)
 	},
@@ -66,12 +67,18 @@ func init() {
 // TODO: Support version ranges
 // TODO: Support branch names
 // TODO: Support git commits
-func installSinglePackage(packageName string, version Version) {
+func installSinglePackage(packageName string, version core.Version) {
 	fmt.Println("Installing package", packageName, "with", strings.ToLower(string(version.Kind)), version.Value)
 	// TODO: validate package name
-	// TODO: Halt if missing ahkpm.json
+	hasAhkpmJson, err := exists("ahkpm.json")
+	if err != nil {
+		utils.Exit("Error checking if ahkpm.json exists")
+	}
+	if !hasAhkpmJson {
+		utils.Exit("ahkpm.json not found in current directory. Run `ahkpm init` to create one.")
+	}
 
-	if version.Kind == SemVerRange || version.Kind == Branch || version.Kind == Commit {
+	if version.Kind == core.SemVerRange || version.Kind == core.Branch || version.Kind == core.Commit {
 		fmt.Println("Unsupported version type. Ranges, branches, and commits are not yet supported")
 		os.Exit(1)
 	}
@@ -80,7 +87,7 @@ func installSinglePackage(packageName string, version Version) {
 
 	packageCacheDir := cacheDir + `\` + packageName
 
-	err := os.MkdirAll(packageCacheDir, os.ModePerm)
+	err = os.MkdirAll(packageCacheDir, os.ModePerm)
 	if err != nil {
 		utils.Exit("Error creating package cache directory")
 	}
@@ -143,7 +150,10 @@ func installSinglePackage(packageName string, version Version) {
 		utils.Exit("Error copying package to target module directory")
 	}
 
-	// TODO: Add the installed package to ahkpm.json's dependencies list
+	core.AhkpmJson{}.
+		ReadFromFile().
+		AddDependency(packageName, version).
+		Save()
 	// TODO: Create/update a lockfile
 }
 
@@ -161,43 +171,3 @@ func exists(path string) (bool, error) {
 func getGitUrl(packageName string) string {
 	return "https://" + packageName + ".git"
 }
-
-func getVersion(versionSpecifier string) Version {
-	v := Version{}
-
-	if utils.IsSemVer(versionSpecifier) {
-		v.Kind = SemVerExact
-		v.Value = versionSpecifier
-	} else if utils.IsSemVerRange(versionSpecifier) {
-		v.Kind = SemVerRange
-	} else if strings.HasPrefix(versionSpecifier, "branch:") {
-		v.Kind = Branch
-		v.Value = strings.TrimPrefix(versionSpecifier, "branch:")
-	} else if strings.HasPrefix(versionSpecifier, "tag:") {
-		v.Kind = Tag
-		v.Value = strings.TrimPrefix(versionSpecifier, "tag:")
-	} else if strings.HasPrefix(versionSpecifier, "commit:") {
-		v.Kind = Commit
-		v.Value = strings.TrimPrefix(versionSpecifier, "commit:")
-	} else {
-		fmt.Println("Invalid version string", versionSpecifier)
-		os.Exit(1)
-	}
-
-	return v
-}
-
-type Version struct {
-	Kind  VersionKind
-	Value string
-}
-
-type VersionKind string
-
-const (
-	SemVerExact VersionKind = "SemVerExact"
-	SemVerRange VersionKind = "SemVerRange"
-	Branch      VersionKind = "Branch"
-	Tag         VersionKind = "Tag"
-	Commit      VersionKind = "Commit"
-)

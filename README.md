@@ -7,12 +7,13 @@ making it easier than ever to automate away the drudgery.
 
 ## Commands
 
-- [ ] `ahkpm init`: Interactively create an `ahkpm.json` file in the current directory
-- [ ] `ahkpm install github.com/user/repo`: Installs a package (other hosts to come later)
+- [x] `ahkpm init`: Interactively create an `ahkpm.json` file in the current directory
+- [ ] `ahkpm install github.com/user/repo`: (Partially implemented) Installs a package (other hosts to come later)
 - [ ] `ahkpm update <name>`: Updates installed packages to the newest version
 - [ ] `ahkpm list`: List local packages and their installed versions
 - [x] `ahkpm help`: Provides documentation
 - [ ] `ahkpm selfupdate`: Upgrade to the latest version of ahkpm
+- [ ] `ahkpm version`
 
 Install an AutoHotKey script (or scripts) from GitHub: `ahkpm github.com/user/repo`
 
