@@ -13,8 +13,7 @@ type Version struct {
 type VersionKind string
 
 const (
-	SemVerExact VersionKind = "SemVerExact"
-	SemVerRange VersionKind = "SemVerRange"
+	SemVerExact VersionKind = "Semantic Version"
 	Branch      VersionKind = "Branch"
 	Tag         VersionKind = "Tag"
 	Commit      VersionKind = "Commit"
@@ -24,8 +23,6 @@ func (v Version) FromString(versionSpecifier string) Version {
 	if utils.IsSemVer(versionSpecifier) {
 		v.Kind = SemVerExact
 		v.Value = versionSpecifier
-	} else if utils.IsSemVerRange(versionSpecifier) {
-		v.Kind = SemVerRange
 	} else if strings.HasPrefix(versionSpecifier, "branch:") {
 		v.Kind = Branch
 		v.Value = strings.TrimPrefix(versionSpecifier, "branch:")
@@ -45,6 +42,9 @@ func (v Version) FromString(versionSpecifier string) Version {
 func (v Version) String() string {
 	if v.Kind == Branch || v.Kind == Tag || v.Kind == Commit {
 		return strings.ToLower(string(v.Kind)) + ":" + v.Value
+	}
+	if v.Kind == SemVerExact {
+		return v.Value
 	}
 	utils.Exit("Invalid version kind " + string(v.Kind))
 	return ""

@@ -16,11 +16,6 @@ func IsSemVer(value string) bool {
 	return isMatch
 }
 
-// TODO: Implement this
-func IsSemVerRange(value string) bool {
-	return false
-}
-
 func Exit(msg string) {
 	fmt.Println(msg)
 	os.Exit(1)
