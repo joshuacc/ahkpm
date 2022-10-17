@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	core "ahkpm/src/core"
 	data "ahkpm/src/data"
 	utils "ahkpm/src/utils"
-	"encoding/json"
 	"fmt"
 	"net/mail"
 	"net/url"
@@ -18,29 +18,12 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type AhkpmJson struct {
-	Name         string            `json:"name"`
-	Version      string            `json:"version"`
-	Description  string            `json:"description"`
-	Repository   string            `json:"repository"`
-	Website      string            `json:"website"`
-	License      string            `json:"license"`
-	IssueTracker string            `json:"issueTracker"`
-	Author       Person            `json:"author"`
-	Dependencies map[string]string `json:"dependencies"`
-}
-
-type Person struct {
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Website string `json:"website"`
-}
-
 // TODO: Add colors to the prompt
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Interactively create an ahkpm.json file in the current directory",
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Abort init if there is already an ahkpm.json file in the current directory
 		cwd, err := os.Getwd()
 		if err != nil {
 			fmt.Println("Unable to get current working directory")
@@ -51,37 +34,33 @@ var initCmd = &cobra.Command{
 		cwd = strings.Replace(cwd, " ", "-", -1)
 
 		// Initialize with default values
-		packageSpec := AhkpmJson{
-			Name:         cwd,
-			Version:      "0.0.1",
-			License:      "MIT",
-			Author:       Person{},
-			Dependencies: make(map[string]string),
-		}
-
-		var jsonBytes []byte
+		aj := core.AhkpmJson{
+			Name:    cwd,
+			Version: "0.0.1",
+			License: "MIT",
+		}.New()
 
 		for {
-			packageSpec.Name = showPrompt(
+			aj.Name = showPrompt(
 				"What is the name of your package?",
 				validateNothing,
-				prompt.OptionInitialBufferText(packageSpec.Name),
+				prompt.OptionInitialBufferText(aj.Name),
 			)
 
-			packageSpec.Version = showPrompt(
+			aj.Version = showPrompt(
 				"What version is the package? (Using semantic versioning)",
 				validateSemver,
-				prompt.OptionInitialBufferText(packageSpec.Version),
+				prompt.OptionInitialBufferText(aj.Version),
 			)
 
-			packageSpec.Description = showPrompt(
+			aj.Description = showPrompt(
 				"Please enter a brief description of the package",
 				validateRequired,
-				prompt.OptionInitialBufferText(packageSpec.Description),
+				prompt.OptionInitialBufferText(aj.Description),
 			)
 
 			// If we're in a git repository, extract the repository url
-			if packageSpec.Repository == "" {
+			if aj.Repository == "" {
 				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
 				if err == nil && string(out) == "true\n" {
 					originUrl, err := exec.Command("git", "remote", "get-url", "origin").Output()
@@ -91,91 +70,86 @@ var initCmd = &cobra.Command{
 							panic(err)
 						}
 						domainAndPath := re.FindSubmatch(originUrl)[1]
-						packageSpec.Repository = "https://" + string(domainAndPath)
+						aj.Repository = "https://" + string(domainAndPath)
 					}
 				}
 			}
 
-			packageSpec.Repository = showPrompt(
+			aj.Repository = showPrompt(
 				"What is the URL of the package's git repository? (optional)",
 				makeOptional(validateGitHub),
-				prompt.OptionInitialBufferText(packageSpec.Repository),
+				prompt.OptionInitialBufferText(aj.Repository),
 			)
 
 			// Website defaults to repository url
-			if packageSpec.Website == "" {
-				packageSpec.Website = packageSpec.Repository
+			if aj.Website == "" {
+				aj.Website = aj.Repository
 			}
 
-			packageSpec.Website = showPrompt(
+			aj.Website = showPrompt(
 				"What is the URL of the package's homepage? (optional)",
 				makeOptional(validateUrl),
-				prompt.OptionInitialBufferText(packageSpec.Website),
+				prompt.OptionInitialBufferText(aj.Website),
 			)
 
 			// Issue tracker defaults to GitHub issues if a GitHub repository is specified
-			if packageSpec.IssueTracker == "" && packageSpec.Repository != "" {
-				packageSpec.IssueTracker = packageSpec.Repository + "/issues"
+			if aj.IssueTracker == "" && aj.Repository != "" {
+				aj.IssueTracker = aj.Repository + "/issues"
 			}
 
-			packageSpec.IssueTracker = showPrompt(
+			aj.IssueTracker = showPrompt(
 				"What is the URL of the package's bug/issue tracker? (optional)",
 				makeOptional(validateUrl),
-				prompt.OptionInitialBufferText(packageSpec.IssueTracker),
+				prompt.OptionInitialBufferText(aj.IssueTracker),
 			)
 
-			packageSpec.License = showPrompt(
+			aj.License = showPrompt(
 				"What license is the package released under? (MIT, Apache, etc.) Must either be a valid SPDX license identifier or \"UNLICENSED\".",
 				buildValidatorFromList(data.GetSpdxLicenseIds()),
-				prompt.OptionInitialBufferText(packageSpec.License),
+				prompt.OptionInitialBufferText(aj.License),
 			)
 
 			// If we're in a git repository, extract the user's name to use as default
-			if packageSpec.Author.Name == "" {
+			if aj.Author.Name == "" {
 				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
 				if err == nil && string(out) == "true\n" {
 					userName, err := exec.Command("git", "config", "--get", "user.name").Output()
 					if err == nil && string(userName) != "" {
-						packageSpec.Author.Name = strings.Replace(string(userName), "\n", "", -1)
+						aj.Author.Name = strings.Replace(string(userName), "\n", "", -1)
 					}
 				}
 			}
 
-			packageSpec.Author.Name = showPrompt(
+			aj.Author.Name = showPrompt(
 				"What is the author's name/alias? (optional)",
 				validateNothing,
-				prompt.OptionInitialBufferText(packageSpec.Author.Name),
+				prompt.OptionInitialBufferText(aj.Author.Name),
 			)
 
 			// If we're in a git repository, extract the user's name to use as default
-			if packageSpec.Author.Email == "" {
+			if aj.Author.Email == "" {
 				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
 				if err == nil && string(out) == "true\n" {
 					email, err := exec.Command("git", "config", "--get", "user.email").Output()
 					if err == nil && string(email) != "" {
-						packageSpec.Author.Email = strings.Replace(string(email), "\n", "", -1)
+						aj.Author.Email = strings.Replace(string(email), "\n", "", -1)
 					}
 				}
 			}
 
-			packageSpec.Author.Email = showPrompt(
+			aj.Author.Email = showPrompt(
 				"What is the author's email address? (optional)",
 				makeOptional(validateEmail),
-				prompt.OptionInitialBufferText(packageSpec.Author.Email),
+				prompt.OptionInitialBufferText(aj.Author.Email),
 			)
 
-			packageSpec.Author.Website = showPrompt(
+			aj.Author.Website = showPrompt(
 				"What is the author's website? (optional)",
 				makeOptional(validateUrl),
-				prompt.OptionInitialBufferText(packageSpec.Author.Website),
+				prompt.OptionInitialBufferText(aj.Author.Website),
 			)
 
-			jsonBytes, err = json.MarshalIndent(packageSpec, "", "  ")
-			if err != nil {
-				return
-			}
-
-			fmt.Println(string(jsonBytes) + "\n")
+			fmt.Println(aj.String() + "\n")
 			fmt.Println("")
 
 			isCorrect := showPrompt(
@@ -192,10 +166,7 @@ var initCmd = &cobra.Command{
 			fmt.Println("")
 		}
 
-		err = os.WriteFile("ahkpm.json", jsonBytes, 0644)
-		if err != nil {
-			panic(err)
-		}
+		aj.Save()
 	},
 }
 
