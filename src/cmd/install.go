@@ -125,8 +125,7 @@ func installSinglePackage(packageName string, version core.Version) {
 	})
 	if err != nil {
 		fmt.Println(err.Error())
-		panic(err)
-		// utils.Exit("Error checking out version")
+		utils.Exit("Error checking out version")
 	}
 
 	submodules, err := worktree.Submodules()
