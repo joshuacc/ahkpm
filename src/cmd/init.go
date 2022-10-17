@@ -2,6 +2,7 @@ package cmd
 
 import (
 	data "ahkpm/src/data"
+	utils "ahkpm/src/utils"
 	"encoding/json"
 	"fmt"
 	"net/mail"
@@ -241,11 +242,7 @@ func validateRequired(value string) (bool, string) {
 }
 
 func validateSemver(value string) (bool, string) {
-	// This regular expression is taken from semver.org
-	isMatch, err := regexp.MatchString("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$", value)
-	if err != nil {
-		panic(err)
-	}
+	isMatch := utils.IsSemVer(value)
 
 	if isMatch {
 		return true, ""

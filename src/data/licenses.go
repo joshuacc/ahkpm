@@ -3,6 +3,8 @@ package data
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
+	"os"
 )
 
 //go:embed spdx-licenses.json
@@ -31,7 +33,8 @@ func GetSpdxLicenseIds() (licenseIds []string) {
 	var file LicenseFile
 	var err = json.Unmarshal(allLicenseBytes, &file)
 	if err != nil {
-		panic(err)
+		fmt.Println("Unable to parse SPDX license data")
+		os.Exit(1)
 	}
 
 	for _, license := range file.Licenses {
