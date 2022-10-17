@@ -3,7 +3,6 @@ package core
 import (
 	"ahkpm/src/utils"
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -52,10 +51,6 @@ func (aj AhkpmJson) ReadFromFile() AhkpmJson {
 }
 
 func (aj AhkpmJson) Save() AhkpmJson {
-	fmt.Println("Saving ahkpm.json")
-	for k, v := range aj.dependencies {
-		fmt.Printf("  %s: %s", k, v)
-	}
 	jsonBytes, err := json.MarshalIndent(aj, "", "  ")
 	if err != nil {
 		utils.Exit("Error marshalling ahkpm.json to bytes")
@@ -88,15 +83,10 @@ func (aj *AhkpmJson) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	aj.dependencies = aux.Dependencies
-	fmt.Println("Unmarshalled ahkpm.json")
 	return nil
 }
 
 func (aj AhkpmJson) MarshalJSON() ([]byte, error) {
-	fmt.Println("Marshalling ahkpm.json")
-	for k, v := range aj.dependencies {
-		fmt.Printf("  %s: %s", k, v)
-	}
 	type Alias AhkpmJson
 	foo := &struct {
 		*Alias
@@ -106,8 +96,5 @@ func (aj AhkpmJson) MarshalJSON() ([]byte, error) {
 		Dependencies: aj.dependencies,
 	}
 
-	for k, v := range foo.Dependencies {
-		fmt.Printf("  %s: %s", k, v)
-	}
 	return json.Marshal(foo)
 }
