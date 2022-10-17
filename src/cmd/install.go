@@ -118,15 +118,6 @@ func installSinglePackage(packageName string, version core.Version) {
 	if err != nil {
 		utils.Exit("Error resolving revision")
 	}
-	// var checkoutOptions git.CheckoutOptions
-	// switch version.Kind {
-	// case core.SemVerExact:
-	// 	checkoutOptions = git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)}
-	// case core.Tag:
-	// 	checkoutOptions = git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)}
-	// case core.Commit:
-	// 	checkoutOptions = git.CheckoutOptions{Hash: plumbing.NewHash(version.Value)}
-	// }
 
 	err = worktree.Checkout(&git.CheckoutOptions{
 		Hash:  (*hash),
