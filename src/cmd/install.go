@@ -76,7 +76,7 @@ func installSinglePackage(packageName string, version Version) {
 		os.Exit(1)
 	}
 
-	cacheDir := getCacheDir()
+	cacheDir := utils.GetCacheDir()
 
 	packageCacheDir := cacheDir + `\` + packageName
 
@@ -92,10 +92,14 @@ func installSinglePackage(packageName string, version Version) {
 
 	if !packageWasCloned {
 		// Clone the repository into the cache directory
-		_, err := git.PlainClone(packageCacheDir, false, &git.CloneOptions{URL: getGitUrl(packageName)})
+		_, err := git.PlainClone(packageCacheDir, false, &git.CloneOptions{
+			URL:               getGitUrl(packageName),
+			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+		})
 		if err != nil {
 			utils.Exit("Error cloning package")
 		}
+
 	} else {
 		// Checkout the specified version
 		repo, err := git.PlainOpen(packageCacheDir)
@@ -111,6 +115,18 @@ func installSinglePackage(packageName string, version Version) {
 		err = worktree.Checkout(&git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)})
 		if err != nil {
 			utils.Exit("Error checking out version")
+		}
+
+		submodules, err := worktree.Submodules()
+		if err != nil {
+			utils.Exit("Error getting submodules")
+		}
+
+		for _, sub := range submodules {
+			err := sub.Update(&git.SubmoduleUpdateOptions{})
+			if err != nil {
+				utils.Exit("Error updating submodule")
+			}
 		}
 	}
 
@@ -129,15 +145,6 @@ func installSinglePackage(packageName string, version Version) {
 
 	// TODO: Add the installed package to ahkpm.json's dependencies list
 	// TODO: Create/update a lockfile
-}
-
-func getCacheDir() string {
-	value, succeeded := os.LookupEnv("userprofile")
-	if !succeeded {
-		fmt.Println("Unable to get userprofile")
-		os.Exit(1)
-	}
-	return value + `\.ahkpm`
 }
 
 func exists(path string) (bool, error) {

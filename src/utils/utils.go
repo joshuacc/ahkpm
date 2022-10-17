@@ -25,3 +25,12 @@ func Exit(msg string) {
 	fmt.Println(msg)
 	os.Exit(1)
 }
+
+func GetCacheDir() string {
+	value, succeeded := os.LookupEnv("userprofile")
+	if !succeeded {
+		fmt.Println("Unable to get userprofile")
+		os.Exit(1)
+	}
+	return value + `\.ahkpm`
+}
