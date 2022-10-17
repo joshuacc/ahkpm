@@ -78,11 +78,6 @@ func installSinglePackage(packageName string, version core.Version) {
 		utils.Exit("ahkpm.json not found in current directory. Run `ahkpm init` to create one.")
 	}
 
-	if version.Kind == core.SemVerRange || version.Kind == core.Branch || version.Kind == core.Commit {
-		fmt.Println("Unsupported version type. Ranges, branches, and commits are not yet supported")
-		os.Exit(1)
-	}
-
 	cacheDir := utils.GetCacheDir()
 
 	packageCacheDir := cacheDir + `\` + packageName
@@ -106,34 +101,52 @@ func installSinglePackage(packageName string, version core.Version) {
 		if err != nil {
 			utils.Exit("Error cloning package")
 		}
+	}
 
-	} else {
-		// Checkout the specified version
-		repo, err := git.PlainOpen(packageCacheDir)
+	// Checkout the specified version
+	repo, err := git.PlainOpen(packageCacheDir)
+	if err != nil {
+		utils.Exit("Error opening package")
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		utils.Exit("Error getting worktree")
+	}
+
+	hash, err := repo.ResolveRevision(plumbing.Revision(version.Value))
+	if err != nil {
+		utils.Exit("Error resolving revision")
+	}
+	// var checkoutOptions git.CheckoutOptions
+	// switch version.Kind {
+	// case core.SemVerExact:
+	// 	checkoutOptions = git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)}
+	// case core.Tag:
+	// 	checkoutOptions = git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)}
+	// case core.Commit:
+	// 	checkoutOptions = git.CheckoutOptions{Hash: plumbing.NewHash(version.Value)}
+	// }
+
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Hash:  (*hash),
+		Force: true, // Ignore changes in the working tree
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+		panic(err)
+		// utils.Exit("Error checking out version")
+	}
+
+	submodules, err := worktree.Submodules()
+	if err != nil {
+		utils.Exit("Error getting submodules")
+	}
+
+	for _, sub := range submodules {
+		err := sub.Update(&git.SubmoduleUpdateOptions{})
 		if err != nil {
-			utils.Exit("Error opening package")
-		}
-
-		worktree, err := repo.Worktree()
-		if err != nil {
-			utils.Exit("Error getting worktree")
-		}
-
-		err = worktree.Checkout(&git.CheckoutOptions{Branch: plumbing.NewTagReferenceName(version.Value)})
-		if err != nil {
-			utils.Exit("Error checking out version")
-		}
-
-		submodules, err := worktree.Submodules()
-		if err != nil {
-			utils.Exit("Error getting submodules")
-		}
-
-		for _, sub := range submodules {
-			err := sub.Update(&git.SubmoduleUpdateOptions{})
-			if err != nil {
-				utils.Exit("Error updating submodule")
-			}
+			utils.Exit("Error updating submodule")
 		}
 	}
 
