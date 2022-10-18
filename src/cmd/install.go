@@ -33,8 +33,11 @@ var installCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			// TODO: install all packages in ahkpm.json
-			fmt.Println("Please specify a package to install")
+			fmt.Println("Installing all dependencies")
+			dependencies := core.AhkpmJson{}.ReadFromFile().Dependencies
+			for dep, ver := range dependencies() {
+				installSinglePackage(dep, core.Version{}.FromString(ver))
+			}
 			return
 		}
 

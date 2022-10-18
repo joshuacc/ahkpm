@@ -8,7 +8,8 @@ making it easier than ever to automate away the drudgery.
 ## Commands
 
 - [x] `ahkpm init`: Interactively create an `ahkpm.json` file in the current directory
-- [ ] `ahkpm install github.com/user/repo`: (Partially implemented) Installs a package (other hosts to come later)
+- [x] `ahkpm install github.com/user/repo`: Installs a package and records it in `ahkpm.json` (other git hosts to come later)
+- [ ] `ahkpm install`: Reinstalls all dependencies listed in `ahkpm.json`
 - [ ] `ahkpm update <name>`: Updates installed packages to the newest version
 - [ ] `ahkpm list`: List local packages and their installed versions
 - [x] `ahkpm help`: Provides documentation
