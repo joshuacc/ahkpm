@@ -15,7 +15,7 @@ import (
 
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Installs the specified package",
+	Short: "Installs either the specified package or all packages listed in ahkpm.json",
 	Run: func(cmd *cobra.Command, args []string) {
 		cwd, err := os.Getwd()
 		if err != nil {
