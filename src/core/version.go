@@ -2,6 +2,7 @@ package core
 
 import (
 	"ahkpm/src/utils"
+	"errors"
 	"strings"
 )
 
@@ -19,7 +20,7 @@ const (
 	Commit      VersionKind = "Commit"
 )
 
-func (v Version) FromString(versionSpecifier string) Version {
+func (v Version) FromString(versionSpecifier string) (Version, error) {
 	if utils.IsSemVer(versionSpecifier) {
 		v.Kind = SemVerExact
 		v.Value = versionSpecifier
@@ -33,10 +34,10 @@ func (v Version) FromString(versionSpecifier string) Version {
 		v.Kind = Commit
 		v.Value = strings.TrimPrefix(versionSpecifier, "commit:")
 	} else {
-		utils.Exit("Invalid version string " + versionSpecifier)
+		return v, errors.New("Invalid version specifier " + versionSpecifier)
 	}
 
-	return v
+	return v, nil
 }
 
 func (v Version) String() string {
