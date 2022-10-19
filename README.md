@@ -45,7 +45,7 @@ Future versions will include an installer.
 
 ## ahkpm.json
 
-```json
+```jsonc
 {
   "name": "my-project",
   "version": "0.0.1",
