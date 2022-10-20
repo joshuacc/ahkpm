@@ -48,7 +48,11 @@ func (i Installer) InstallSinglePackage(packageName string, version Version) {
 			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 		})
 		if err != nil {
-			utils.Exit("Error cloning package")
+			message := "Error cloning package"
+			if err.Error() == "authentication required" {
+				message = "Error downloading package " + packageName + ". Are you sure that package exists?"
+			}
+			utils.Exit(message)
 		}
 	}
 
@@ -65,7 +69,11 @@ func (i Installer) InstallSinglePackage(packageName string, version Version) {
 
 	hash, err := repo.ResolveRevision(plumbing.Revision(version.Value))
 	if err != nil {
-		utils.Exit("Error resolving revision")
+		message := "Error resolving revision"
+		if err.Error() == "reference not found" {
+			message = "Could not find version " + version.String() + " for package " + packageName + ". Are you sure that version exists?"
+		}
+		utils.Exit(message)
 	}
 
 	err = worktree.Checkout(&git.CheckoutOptions{
