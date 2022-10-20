@@ -18,4 +18,4 @@ jobs:
         uses: magefile/mage-action@v2
         with:
           version: latest
-          args: ciVerify
+          args: verify
