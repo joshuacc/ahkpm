@@ -19,3 +19,6 @@ jobs:
         with:
           version: latest
           args: verify
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.1
+

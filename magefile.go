@@ -23,7 +23,14 @@ func Lint() error {
 }
 
 func Test() error {
-	return sh.RunV("go", "test", "-timeout", "30s", "-cover", "./...")
+	return sh.RunV(
+		"go", "test",
+		"-covermode", "atomic",
+		"-coverprofile", "coverage.out",
+		"-timeout", "30s",
+		"-cover",
+		"./...",
+	)
 }
 
 func Build() error {
