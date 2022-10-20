@@ -16,8 +16,6 @@ type Installer struct{}
 // Installs a single package. For now only support installing an exact version
 // TODO: Support omitting version specifier
 // TODO: Support version ranges
-// TODO: Support branch names
-// TODO: Support git commits
 func (i Installer) InstallSinglePackage(packageName string, version Version) {
 	fmt.Println("Installing package", packageName, "with", strings.ToLower(string(version.Kind)), version.Value)
 	// TODO: validate package name
