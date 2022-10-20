@@ -1,8 +1,11 @@
 name: mage
 on: 
   pull_request:
+    branches:
+      - main
   push:
-    - main
+    branches:
+      - main
 
 
 jobs:
