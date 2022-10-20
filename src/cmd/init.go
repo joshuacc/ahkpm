@@ -23,7 +23,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Interactively create an ahkpm.json file in the current directory",
 	Run: func(cmd *cobra.Command, args []string) {
-		ajExists, err := exists("ahkpm.json")
+		ajExists, err := utils.FileExists("ahkpm.json")
 		if err != nil {
 			utils.Exit("Error checking for ahkpm.json")
 		}

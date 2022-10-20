@@ -30,7 +30,7 @@ func Build() error {
 	return sh.Run("go", "build", "-o", "bin/ahkpm.exe", "./src")
 }
 
-func CIVerify() error {
+func Verify() error {
 	if err := Lint(); err != nil {
 		return err
 	}
