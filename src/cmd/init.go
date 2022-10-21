@@ -229,7 +229,7 @@ func validateSemver(value string) (bool, string) {
 }
 
 func validateGitHub(value string) (bool, string) {
-	isMatch, err := regexp.MatchString("^https:\\/\\/github\\.com\\/\\w+\\/\\w+$", value)
+	isMatch, err := regexp.MatchString("^https:\\/\\/github\\.com\\/[\\w-\\.]+\\/[\\w-\\.]+$", value)
 	if err != nil {
 		panic(err)
 	}
