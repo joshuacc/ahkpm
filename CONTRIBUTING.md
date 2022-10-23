@@ -35,10 +35,6 @@ After your system meets the requirements above:
 - Push your changes to your fork
 - Open up a pull request with your changes
 
-To build the Windows MSI installer locally:
-
-- Make sure you have [go-msi](https://mh-cbon.github.io/go-msi/) installed
-- From 
 ## License stuff
 
 Any contributions made to ahkpm will be under the MIT license which covers the project as a whole.
