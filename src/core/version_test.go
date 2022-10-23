@@ -24,14 +24,14 @@ func TestVersionFromString(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		v, err := Version{}.FromString(c.specifier)
+		v, err := VersionFromSpecifier(c.specifier)
 
 		if c.shouldError {
 			assert.Error(t, err)
 		} else {
 			assert.NoError(t, err)
-			assert.Equal(t, c.kind, v.Kind)
-			assert.Equal(t, c.value, v.Value)
+			assert.Equal(t, c.kind, v.VersionKind())
+			assert.Equal(t, c.value, v.Value())
 		}
 	}
 }
@@ -51,7 +51,7 @@ func TestVersionString(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		v := Version{Kind: c.kind, Value: c.value}
+		v := NewVersion(c.kind, c.value)
 		assert.Equal(t, c.expected, v.String())
 	}
 }
