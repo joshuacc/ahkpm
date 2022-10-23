@@ -35,7 +35,7 @@ var installCmd = &cobra.Command{
 			fmt.Println("Installing all dependencies")
 			dependencies := core.AhkpmJson{}.ReadFromFile().Dependencies
 			for dep, ver := range dependencies() {
-				v, err := core.Version{}.FromString(ver)
+				v, err := core.VersionFromSpecifier(ver)
 				if err != nil {
 					utils.Exit(err.Error())
 				}
@@ -58,7 +58,7 @@ var installCmd = &cobra.Command{
 			versionSpecifier = splitArg[1]
 		}
 
-		version, err := core.Version{}.FromString(versionSpecifier)
+		version, err := core.VersionFromSpecifier(versionSpecifier)
 		if err != nil {
 			utils.Exit(err.Error())
 		}

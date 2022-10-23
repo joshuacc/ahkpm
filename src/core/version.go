@@ -6,9 +6,15 @@ import (
 	"strings"
 )
 
-type Version struct {
-	Kind  VersionKind
-	Value string
+type Version interface {
+	VersionKind() VersionKind
+	Value() string
+	String() string
+}
+
+type version struct {
+	kind  VersionKind
+	value string
 }
 
 type VersionKind string
@@ -20,19 +26,29 @@ const (
 	Commit      VersionKind = "Commit"
 )
 
-func (v Version) FromString(versionSpecifier string) (Version, error) {
+func NewVersion(kind VersionKind, value string) Version {
+	return version{
+		kind:  VersionKind(kind),
+		value: value,
+	}
+}
+
+// Converts a version specifier string into a Version.
+func VersionFromSpecifier(versionSpecifier string) (Version, error) {
+	v := version{}
+
 	if utils.IsSemVer(versionSpecifier) {
-		v.Kind = SemVerExact
-		v.Value = versionSpecifier
+		v.kind = SemVerExact
+		v.value = versionSpecifier
 	} else if strings.HasPrefix(versionSpecifier, "branch:") {
-		v.Kind = Branch
-		v.Value = strings.TrimPrefix(versionSpecifier, "branch:")
+		v.kind = Branch
+		v.value = strings.TrimPrefix(versionSpecifier, "branch:")
 	} else if strings.HasPrefix(versionSpecifier, "tag:") {
-		v.Kind = Tag
-		v.Value = strings.TrimPrefix(versionSpecifier, "tag:")
+		v.kind = Tag
+		v.value = strings.TrimPrefix(versionSpecifier, "tag:")
 	} else if strings.HasPrefix(versionSpecifier, "commit:") {
-		v.Kind = Commit
-		v.Value = strings.TrimPrefix(versionSpecifier, "commit:")
+		v.kind = Commit
+		v.value = strings.TrimPrefix(versionSpecifier, "commit:")
 	} else {
 		return v, errors.New("Invalid version specifier " + versionSpecifier)
 	}
@@ -40,13 +56,22 @@ func (v Version) FromString(versionSpecifier string) (Version, error) {
 	return v, nil
 }
 
-func (v Version) String() string {
-	if v.Kind == Branch || v.Kind == Tag || v.Kind == Commit {
-		return strings.ToLower(string(v.Kind)) + ":" + v.Value
+// Represents the Version as a valid version specifier string.
+func (v version) String() string {
+	if v.kind == Branch || v.kind == Tag || v.kind == Commit {
+		return strings.ToLower(string(v.kind)) + ":" + v.value
 	}
-	if v.Kind == SemVerExact {
-		return v.Value
+	if v.kind == SemVerExact {
+		return v.value
 	}
-	utils.Exit("Invalid version kind " + string(v.Kind))
+	utils.Exit("Invalid version kind " + string(v.kind))
 	return ""
+}
+
+func (v version) VersionKind() VersionKind {
+	return v.kind
+}
+
+func (v version) Value() string {
+	return v.value
 }

@@ -17,7 +17,7 @@ type Installer struct{}
 // TODO: Support omitting version specifier
 // TODO: Support version ranges
 func (i Installer) InstallSinglePackage(packageName string, version Version) {
-	fmt.Println("Installing package", packageName, "with", strings.ToLower(string(version.Kind)), version.Value)
+	fmt.Println("Installing package", packageName, "with", strings.ToLower(string(version.VersionKind())), version.Value())
 	// TODO: validate package name
 	hasAhkpmJson, err := utils.FileExists("ahkpm.json")
 	if err != nil {
@@ -67,7 +67,7 @@ func (i Installer) InstallSinglePackage(packageName string, version Version) {
 		utils.Exit("Error getting worktree")
 	}
 
-	hash, err := repo.ResolveRevision(plumbing.Revision(version.Value))
+	hash, err := repo.ResolveRevision(plumbing.Revision(version.Value()))
 	if err != nil {
 		message := "Error resolving revision"
 		if err.Error() == "reference not found" {
