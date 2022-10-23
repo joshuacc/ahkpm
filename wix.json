@@ -1,0 +1,26 @@
+{
+  "product": "ahkpm",
+  "company": "n/a",
+  "license": "LICENSE",
+  "upgrade-code": "f89aa6f5-53b5-4ed8-8814-080e4a0a5fea",
+  "files": {
+    "guid": "532c4736-e2a4-48a8-9cdd-2ab52794c390",
+    "items": ["bin/ahkpm.exe"]
+  },
+  "directories": [],
+  "env": {
+    "guid": "",
+    "vars": [
+      {
+        "name": "PATH",
+        "value": "[INSTALLDIR]",
+        "permanent": "yes",
+        "system": "no",
+        "action": "set",
+        "part": "last"
+      }
+    ]
+  },
+  "shortcuts": {},
+  "choco": {}
+}
