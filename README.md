@@ -74,5 +74,9 @@ Future versions will include an installer.
 }
 ```
 
+## Contributing to ahkpm
+
+See the [contribution guidelines](./CONTRIBUTING.md)
+
 [ahk]:https://www.autohotkey.com/
 [semver]:https://semver.org/
