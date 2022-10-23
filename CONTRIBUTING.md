@@ -21,7 +21,7 @@ To contribute to ahkpm's codebase, you will need the following:
 - [Mage](https://magefile.org/) installed
 - [golangci-lint](https://golangci-lint.run/) installed (Optional, but recommended for in-editor feedback)
 
-After your system meets the requirements above,
+After your system meets the requirements above:
 
 - Fork the ahkpm repo
 - Clone your fork

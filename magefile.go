@@ -52,3 +52,9 @@ func Verify() error {
 
 	return nil
 }
+
+// This command requires both Wix and go-msi to be installed on the system.
+// GitHub actions has Wix installed by default, but go-msi must be installed.
+func Msi(version string) error {
+	return sh.Run("go-msi", "make", "--src", "wix-templates", "--msi", "bin/ahkpm.msi", "--version", version)
+}
