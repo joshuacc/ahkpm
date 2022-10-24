@@ -11,25 +11,14 @@ import (
 var allLicenseBytes []byte
 
 func GetSpdxLicenseIds() (licenseIds []string) {
-	type License struct {
-		Reference             string   `json:"reference"`
-		IsDeprecatedLicenseID bool     `json:"isDeprecatedLicenseId"`
-		DetailsURL            string   `json:"detailsUrl"`
-		ReferenceNumber       int      `json:"referenceNumber"`
-		Name                  string   `json:"name"`
-		LicenseId             string   `json:"licenseId"`
-		SeeAlso               []string `json:"seeAlso"`
-		IsOsiApproved         bool     `json:"isOsiApproved"`
-	}
-
 	type LicenseFile struct {
-		LicenseLastVersion string `json:"licenseLastVersion"`
-		ReleaseDate        string `json:"releaseDate"`
-		Licenses           []License
+		LicenseLastVersion string   `json:"licenseLastVersion"`
+		ReleaseDate        string   `json:"releaseDate"`
+		Licenses           []string `json:"licenses"`
 	}
-	var allLicenses []string
 
 	// License data taken from https://github.com/spdx/license-list-data/blob/v3.18/json/licenses.json
+	// Subsequently trimmed down to just the ids.
 	var file LicenseFile
 	var err = json.Unmarshal(allLicenseBytes, &file)
 	if err != nil {
@@ -37,9 +26,5 @@ func GetSpdxLicenseIds() (licenseIds []string) {
 		os.Exit(1)
 	}
 
-	for _, license := range file.Licenses {
-		allLicenses = append(allLicenses, license.LicenseId)
-	}
-
-	return allLicenses
+	return file.Licenses
 }
