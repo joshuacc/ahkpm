@@ -85,6 +85,8 @@ As a result it has the following limitations.
 - It is not (yet) conveniently packaged into a Windows installer
 - It doesn't (yet) have a lockfile like other package managers, which means that your dependency's code can unexpectedly change out from under you when you run `ahkpm install` to reinstall it, especially if you do something like specifying a `branch:` version.
 
+If you'd like to help remedy these limitations, consider contributing!
+
 ## Contributing to ahkpm
 
 See the [contribution guidelines](./CONTRIBUTING.md)
