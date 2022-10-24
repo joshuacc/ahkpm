@@ -4,6 +4,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/magefile/mage/sh"
 	"github.com/princjef/mageutil/bintool"
 )
@@ -35,6 +37,14 @@ func Test() error {
 
 func Build() error {
 	return sh.Run("go", "build", "-o", "bin/ahkpm.exe", "./src")
+}
+
+func BuildWithVersion(version string) error {
+	err := os.WriteFile("src/constants/ahkpm-version.txt", []byte(version), 0644)
+	if err != nil {
+		return err
+	}
+	return Build()
 }
 
 func Verify() error {
