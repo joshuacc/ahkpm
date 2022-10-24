@@ -74,6 +74,19 @@ Future versions will include an installer.
 }
 ```
 
+## Current limitations
+
+ahkpm is being actively developed, but it is still a young project.
+As a result it has the following limitations.
+
+- It only supports hosting and downloading of packages on GitHub, though other git hosts will be supported in the future.
+- It doesn't (yet) resolve dependencies of dependencies, so it isn't (yet) useful for managing the dependencies of a reusable AHK library.
+- It doesn't (yet) support specifying version ranges as you can in npm and other package managers.
+- It is not (yet) conveniently packaged into a Windows installer
+- It doesn't (yet) have a lockfile like other package managers, which means that your dependency's code can unexpectedly change out from under you when you run `ahkpm install` to reinstall it, especially if you do something like specifying a `branch:` version.
+
+If you'd like to help remedy these limitations, consider contributing!
+
 ## Contributing to ahkpm
 
 See the [contribution guidelines](./CONTRIBUTING.md)
