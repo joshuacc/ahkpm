@@ -23,11 +23,11 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Interactively create an ahkpm.json file in the current directory",
 	Run: func(cmd *cobra.Command, args []string) {
-		ajExists, err := utils.FileExists("ahkpm.json")
+		manifestExists, err := utils.FileExists("ahkpm.json")
 		if err != nil {
 			utils.Exit("Error checking for ahkpm.json")
 		}
-		if ajExists {
+		if manifestExists {
 			utils.Exit("ahkpm.json already exists in this directory")
 		}
 
@@ -41,33 +41,32 @@ var initCmd = &cobra.Command{
 		cwd = strings.Replace(cwd, " ", "-", -1)
 
 		// Initialize with default values
-		aj := core.AhkpmJson{
-			Name:    cwd,
-			Version: "0.0.1",
-			License: "MIT",
-		}.New()
+		manifest := core.NewManifest()
+		manifest.Name = cwd
+		manifest.Version = "0.0.1"
+		manifest.License = "MIT"
 
 		for {
-			aj.Name = showPrompt(
+			manifest.Name = showPrompt(
 				"What is the name of your package?",
 				validateNothing,
-				prompt.OptionInitialBufferText(aj.Name),
+				prompt.OptionInitialBufferText(manifest.Name),
 			)
 
-			aj.Version = showPrompt(
+			manifest.Version = showPrompt(
 				"What version is the package? (Using semantic versioning)",
 				validateSemver,
-				prompt.OptionInitialBufferText(aj.Version),
+				prompt.OptionInitialBufferText(manifest.Version),
 			)
 
-			aj.Description = showPrompt(
+			manifest.Description = showPrompt(
 				"Please enter a brief description of the package",
 				validateRequired,
-				prompt.OptionInitialBufferText(aj.Description),
+				prompt.OptionInitialBufferText(manifest.Description),
 			)
 
 			// If we're in a git repository, extract the repository url
-			if aj.Repository == "" {
+			if manifest.Repository == "" {
 				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
 				if err == nil && string(out) == "true\n" {
 					originUrl, err := exec.Command("git", "remote", "get-url", "origin").Output()
@@ -77,86 +76,86 @@ var initCmd = &cobra.Command{
 							panic(err)
 						}
 						domainAndPath := re.FindSubmatch(originUrl)[1]
-						aj.Repository = "https://" + string(domainAndPath)
+						manifest.Repository = "https://" + string(domainAndPath)
 					}
 				}
 			}
 
-			aj.Repository = showPrompt(
+			manifest.Repository = showPrompt(
 				"What is the URL of the package's git repository? (optional)",
 				makeOptional(validateGitHub),
-				prompt.OptionInitialBufferText(aj.Repository),
+				prompt.OptionInitialBufferText(manifest.Repository),
 			)
 
 			// Website defaults to repository url
-			if aj.Website == "" {
-				aj.Website = aj.Repository
+			if manifest.Website == "" {
+				manifest.Website = manifest.Repository
 			}
 
-			aj.Website = showPrompt(
+			manifest.Website = showPrompt(
 				"What is the URL of the package's homepage? (optional)",
 				makeOptional(validateUrl),
-				prompt.OptionInitialBufferText(aj.Website),
+				prompt.OptionInitialBufferText(manifest.Website),
 			)
 
 			// Issue tracker defaults to GitHub issues if a GitHub repository is specified
-			if aj.IssueTracker == "" && aj.Repository != "" {
-				aj.IssueTracker = aj.Repository + "/issues"
+			if manifest.IssueTracker == "" && manifest.Repository != "" {
+				manifest.IssueTracker = manifest.Repository + "/issues"
 			}
 
-			aj.IssueTracker = showPrompt(
+			manifest.IssueTracker = showPrompt(
 				"What is the URL of the package's bug/issue tracker? (optional)",
 				makeOptional(validateUrl),
-				prompt.OptionInitialBufferText(aj.IssueTracker),
+				prompt.OptionInitialBufferText(manifest.IssueTracker),
 			)
 
-			aj.License = showPrompt(
+			manifest.License = showPrompt(
 				"What license is the package released under? (MIT, Apache, etc.) Must either be a valid SPDX license identifier or \"UNLICENSED\".",
 				buildValidatorFromList(data.GetSpdxLicenseIds()),
-				prompt.OptionInitialBufferText(aj.License),
+				prompt.OptionInitialBufferText(manifest.License),
 			)
 
 			// If we're in a git repository, extract the user's name to use as default
-			if aj.Author.Name == "" {
+			if manifest.Author.Name == "" {
 				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
 				if err == nil && string(out) == "true\n" {
 					userName, err := exec.Command("git", "config", "--get", "user.name").Output()
 					if err == nil && string(userName) != "" {
-						aj.Author.Name = strings.Replace(string(userName), "\n", "", -1)
+						manifest.Author.Name = strings.Replace(string(userName), "\n", "", -1)
 					}
 				}
 			}
 
-			aj.Author.Name = showPrompt(
+			manifest.Author.Name = showPrompt(
 				"What is the author's name/alias? (optional)",
 				validateNothing,
-				prompt.OptionInitialBufferText(aj.Author.Name),
+				prompt.OptionInitialBufferText(manifest.Author.Name),
 			)
 
 			// If we're in a git repository, extract the user's name to use as default
-			if aj.Author.Email == "" {
+			if manifest.Author.Email == "" {
 				out, err := exec.Command("git", "rev-parse", "--is-inside-work-tree").Output()
 				if err == nil && string(out) == "true\n" {
 					email, err := exec.Command("git", "config", "--get", "user.email").Output()
 					if err == nil && string(email) != "" {
-						aj.Author.Email = strings.Replace(string(email), "\n", "", -1)
+						manifest.Author.Email = strings.Replace(string(email), "\n", "", -1)
 					}
 				}
 			}
 
-			aj.Author.Email = showPrompt(
+			manifest.Author.Email = showPrompt(
 				"What is the author's email address? (optional)",
 				makeOptional(validateEmail),
-				prompt.OptionInitialBufferText(aj.Author.Email),
+				prompt.OptionInitialBufferText(manifest.Author.Email),
 			)
 
-			aj.Author.Website = showPrompt(
+			manifest.Author.Website = showPrompt(
 				"What is the author's website? (optional)",
 				makeOptional(validateUrl),
-				prompt.OptionInitialBufferText(aj.Author.Website),
+				prompt.OptionInitialBufferText(manifest.Author.Website),
 			)
 
-			fmt.Println(aj.String() + "\n")
+			fmt.Println(manifest.String() + "\n")
 			fmt.Println("")
 
 			isCorrect := showPrompt(
@@ -173,7 +172,7 @@ var initCmd = &cobra.Command{
 			fmt.Println("")
 		}
 
-		aj.Save()
+		manifest.Save()
 	},
 }
 

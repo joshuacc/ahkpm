@@ -33,7 +33,7 @@ var installCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			fmt.Println("Installing all dependencies")
-			dependencies := core.AhkpmJson{}.ReadFromFile().Dependencies
+			dependencies := core.NewManifest().ReadFromFile().Dependencies
 			for dep, ver := range dependencies() {
 				v, err := core.VersionFromSpecifier(ver)
 				if err != nil {

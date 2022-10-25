@@ -110,7 +110,7 @@ func (i Installer) InstallSinglePackage(packageName string, version Version) {
 		utils.Exit("Error copying package to target module directory")
 	}
 
-	AhkpmJson{}.
+	NewManifest().
 		ReadFromFile().
 		AddDependency(packageName, version).
 		Save()
