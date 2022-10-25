@@ -6,7 +6,8 @@ import (
 	"os"
 )
 
-type AhkpmJson struct {
+// Manifest contains the data from ahkpm.json
+type Manifest struct {
 	Name         string `json:"name"`
 	Version      string `json:"version"`
 	Description  string `json:"description"`
@@ -24,34 +25,35 @@ type Person struct {
 	Website string `json:"website"`
 }
 
-func (aj AhkpmJson) New() AhkpmJson {
-	aj.Author = Person{}
-	aj.dependencies = make(map[string]string)
-	return aj
+func NewManifest() *Manifest {
+	return &Manifest{
+		Author:       Person{},
+		dependencies: make(map[string]string),
+	}
 }
 
-func (aj AhkpmJson) String() string {
-	jsonBytes, err := json.MarshalIndent(aj, "", "  ")
+func (m *Manifest) String() string {
+	jsonBytes, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		utils.Exit("Error marshalling ahkpm.json to string")
 	}
 	return string(jsonBytes)
 }
 
-func (aj AhkpmJson) ReadFromFile() AhkpmJson {
+func (m *Manifest) ReadFromFile() *Manifest {
 	jsonBytes, err := os.ReadFile("ahkpm.json")
 	if err != nil {
 		utils.Exit("Error reading ahkpm.json")
 	}
-	err = json.Unmarshal(jsonBytes, &aj)
+	err = json.Unmarshal(jsonBytes, &m)
 	if err != nil {
 		utils.Exit("Error unmarshalling ahkpm.json")
 	}
-	return aj
+	return m
 }
 
-func (aj AhkpmJson) Save() AhkpmJson {
-	jsonBytes, err := json.MarshalIndent(aj, "", "  ")
+func (m Manifest) Save() Manifest {
+	jsonBytes, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		utils.Exit("Error marshalling ahkpm.json to bytes")
 	}
@@ -59,41 +61,41 @@ func (aj AhkpmJson) Save() AhkpmJson {
 	if err != nil {
 		utils.Exit("Error writing ahkpm.json")
 	}
-	return aj
+	return m
 }
 
-func (aj AhkpmJson) Dependencies() map[string]string {
-	return aj.dependencies
+func (m *Manifest) Dependencies() map[string]string {
+	return m.dependencies
 }
 
-func (aj AhkpmJson) AddDependency(name string, version Version) AhkpmJson {
-	aj.dependencies[name] = version.String()
-	return aj
+func (m *Manifest) AddDependency(name string, version Version) Manifest {
+	m.dependencies[name] = version.String()
+	return *m
 }
 
-func (aj *AhkpmJson) UnmarshalJSON(data []byte) error {
-	type Alias AhkpmJson
+func (m *Manifest) UnmarshalJSON(data []byte) error {
+	type Alias Manifest
 	aux := &struct {
 		Dependencies map[string]string `json:"dependencies"`
 		*Alias
 	}{
-		Alias: (*Alias)(aj),
+		Alias: (*Alias)(m),
 	}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	aj.dependencies = aux.Dependencies
+	m.dependencies = aux.Dependencies
 	return nil
 }
 
-func (aj AhkpmJson) MarshalJSON() ([]byte, error) {
-	type Alias AhkpmJson
+func (m Manifest) MarshalJSON() ([]byte, error) {
+	type Alias Manifest
 	foo := &struct {
 		*Alias
 		Dependencies map[string]string `json:"dependencies"`
 	}{
-		Alias:        (*Alias)(&aj),
-		Dependencies: aj.dependencies,
+		Alias:        (*Alias)(&m),
+		Dependencies: m.dependencies,
 	}
 
 	return json.Marshal(foo)
