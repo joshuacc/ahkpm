@@ -24,8 +24,11 @@ Flags:
 
 ## Installation
 
-At this point you will need to compile ahkpm on your machine and then add it to your path.
-Future versions will include an installer.
+To install ahkpm:
+
+1. Go to the [releases][releases] page and find the most recent version.
+2. Download the `ahkpm-{version}.msi` file.
+3. Open it on your Windows machine to launch the ahkpm installer.
 
 ## Basic usage
 
@@ -93,3 +96,4 @@ See the [contribution guidelines](./CONTRIBUTING.md)
 
 [ahk]:https://www.autohotkey.com/
 [semver]:https://semver.org/
+[releases]:https://github.com/joshuacc/ahkpm/releases
