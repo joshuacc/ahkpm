@@ -13,7 +13,7 @@ func TestResolveWithNoDependencies(t *testing.T) {
 	resolvedList, err := dr.Resolve([]Dependency{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, []Node[Dependency]{}, resolvedList)
+	assert.Equal(t, []TreeNode[Dependency]{}, resolvedList)
 }
 
 func TestResolveWithNoChildDependencies(t *testing.T) {
@@ -28,10 +28,10 @@ func TestResolveWithNoChildDependencies(t *testing.T) {
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []Node[Dependency]{
+	expectedList := []TreeNode[Dependency]{
 		{
 			Value:    deps[0],
-			Children: []Node[Dependency]{},
+			Children: []TreeNode[Dependency]{},
 		},
 	}
 	assert.NoError(t, err)
@@ -54,17 +54,42 @@ func TestResolveWithChildDependencies(t *testing.T) {
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []Node[Dependency]{
+	expectedList := []TreeNode[Dependency]{
 		{
 			Value: deps[0],
-			Children: []Node[Dependency]{
+			Children: []TreeNode[Dependency]{
 				{
 					Value:    childDeps[0],
-					Children: []Node[Dependency]{},
+					Children: []TreeNode[Dependency]{},
 				},
 			},
 		},
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, expectedList, resolvedList)
+}
+
+func TestResolveWithConflictingChildDepencyVersions(t *testing.T) {
+	dr := NewDependencyResolver()
+	deps := []Dependency{
+		NewDependency("A", NewVersion(SemVerExact, "1.2.3")),
+		NewDependency("B", NewVersion(SemVerExact, "1.2.3")),
+	}
+	aDeps := []Dependency{
+		NewDependency("badDep", NewVersion(SemVerExact, "1.2.3")),
+	}
+	bDeps := []Dependency{
+		NewDependency("badDep", NewVersion(SemVerExact, "1.2.4")),
+	}
+	mockPR := &mocks.MockPackagesRepository{}
+	mockPR.On("GetPackageDependencies", deps[0]).Return(aDeps, nil)
+	mockPR.On("GetPackageDependencies", deps[1]).Return(bDeps, nil)
+	mockPR.On("GetPackageDependencies", aDeps[0]).Return([]Dependency{}, nil)
+	mockPR.On("GetPackageDependencies", bDeps[0]).Return([]Dependency{}, nil)
+
+	dr.ReplacePackagesRepository(mockPR)
+
+	_, err := dr.Resolve(deps)
+
+	assert.Error(t, err)
 }

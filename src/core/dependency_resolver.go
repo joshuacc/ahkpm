@@ -1,6 +1,8 @@
 package core
 
-import "ahkpm/src/utils"
+import (
+	"fmt"
+)
 
 type DependencyResolver interface {
 	// Resolve takes in a list of packages and versions, scans them recursively
@@ -8,15 +10,10 @@ type DependencyResolver interface {
 	// more than once, the specified versions are compared. In the case of a conflict,
 	// an error is returned. For the time being, any difference in versions is
 	// considered a conflict.
-	Resolve(deps []Dependency) (resolvedDependencies []Node[Dependency], err error)
+	Resolve(deps []Dependency) (resolvedDependencies []TreeNode[Dependency], err error)
 
 	// ReplacePackagesRepository is used for testing
 	ReplacePackagesRepository(pr PackagesRepository)
-}
-
-type Node[T any] struct {
-	Value    T
-	Children []Node[T]
 }
 
 type resolver struct {
@@ -29,18 +26,18 @@ func NewDependencyResolver() DependencyResolver {
 	}
 }
 
-func (r *resolver) Resolve(deps []Dependency) ([]Node[Dependency], error) {
+func (r *resolver) Resolve(deps []Dependency) ([]TreeNode[Dependency], error) {
 	if len(deps) == 0 {
-		return []Node[Dependency]{}, nil
+		return []TreeNode[Dependency]{}, nil
 	}
 
-	depNodes := make([]Node[Dependency], len(deps))
+	depNodes := make([]TreeNode[Dependency], len(deps))
 
 	// For each dependency, get its transitive dependencies.
 	for i, dep := range deps {
 		childDependencies, err := r.packagesRepository.GetPackageDependencies(dep)
 		if err != nil {
-			utils.Exit(err.Error())
+			return nil, err
 		}
 
 		children, err := r.Resolve(childDependencies)
@@ -48,23 +45,41 @@ func (r *resolver) Resolve(deps []Dependency) ([]Node[Dependency], error) {
 			return nil, err
 		}
 
-		depNodes[i] = Node[Dependency]{
+		depNodes[i] = TreeNode[Dependency]{
 			Value:    dep,
 			Children: children,
 		}
 	}
 
+	err := checkForConflicts(depNodes)
+	if err != nil {
+		return nil, err
+	}
+
 	return depNodes, nil
+}
+
+func checkForConflicts(depNodes []TreeNode[Dependency]) error {
+	allDeps := make([]Dependency, 0)
+	for _, depNode := range depNodes {
+		allDeps = append(allDeps, depNode.Flatten()...)
+	}
+
+	depMap := make(map[string]Dependency)
+	for _, dep := range allDeps {
+		// If the dependency is already in the map, check if the versions are the same.
+		if existingDep, ok := depMap[dep.Name()]; ok {
+			if existingDep.Version() != dep.Version() {
+				return fmt.Errorf("conflicting versions for dependency %s: %s and %s", dep.Name(), existingDep.Version(), dep.Version())
+			}
+		} else {
+			depMap[dep.Name()] = dep
+		}
+	}
+
+	return nil
 }
 
 func (r *resolver) ReplacePackagesRepository(pr PackagesRepository) {
 	r.packagesRepository = pr
-}
-
-func ArrayToNodes[T any](arr []T) []Node[T] {
-	nodes := make([]Node[T], len(arr))
-	for i, item := range arr {
-		nodes[i] = Node[T]{Value: item}
-	}
-	return nodes
 }
