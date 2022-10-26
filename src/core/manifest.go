@@ -40,10 +40,14 @@ func (m *Manifest) String() string {
 	return string(jsonBytes)
 }
 
-func (m *Manifest) ReadFromFile() *Manifest {
-	jsonBytes, err := os.ReadFile("ahkpm.json")
+func (m *Manifest) ReadFromCwd() *Manifest {
+	return m.ReadFromFile("ahkpm.json")
+}
+
+func (m *Manifest) ReadFromFile(path string) *Manifest {
+	jsonBytes, err := os.ReadFile(path)
 	if err != nil {
-		utils.Exit("Error reading ahkpm.json")
+		utils.Exit("Error reading ahkpm.json at " + path)
 	}
 	err = json.Unmarshal(jsonBytes, &m)
 	if err != nil {
@@ -64,8 +68,16 @@ func (m Manifest) Save() Manifest {
 	return m
 }
 
-func (m *Manifest) Dependencies() map[string]string {
-	return m.dependencies
+func (m *Manifest) Dependencies() []Dependency {
+	deps := make([]Dependency, len(m.dependencies))
+	for name, versionString := range m.dependencies {
+		version, err := VersionFromSpecifier(versionString)
+		if err != nil {
+			utils.Exit("Error parsing version specifier " + versionString)
+		}
+		deps = append(deps, NewDependency(name, version))
+	}
+	return deps
 }
 
 func (m *Manifest) AddDependency(name string, version Version) Manifest {
