@@ -19,3 +19,8 @@ func (m *MockPackagesRepository) GetPackageDependencies(dep Dependency) ([]Depen
 	args := m.Called(dep)
 	return args.Get(0).([]Dependency), args.Error(1)
 }
+
+func (m *MockPackagesRepository) ClearCache() error {
+	args := m.Called()
+	return args.Error(0)
+}
