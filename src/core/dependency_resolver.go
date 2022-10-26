@@ -42,11 +42,16 @@ func (r *resolver) Resolve(deps []Dependency) ([]Node[Dependency], error) {
 		if err != nil {
 			utils.Exit(err.Error())
 		}
-		depNode := Node[Dependency]{
-			Value:    dep,
-			Children: ArrayToNodes(childDependencies),
+
+		children, err := r.Resolve(childDependencies)
+		if err != nil {
+			return nil, err
 		}
-		depNodes[i] = depNode
+
+		depNodes[i] = Node[Dependency]{
+			Value:    dep,
+			Children: children,
+		}
 	}
 
 	return depNodes, nil
