@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	core "ahkpm/src/core"
 	utils "ahkpm/src/utils"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -29,9 +29,7 @@ func init() {
 
 func cleanCache() {
 	fmt.Println("Cleaning cache...")
-	cacheDir := utils.GetCacheDir()
-
-	err := os.RemoveAll(cacheDir)
+	err := core.NewPackagesRepository().ClearCache()
 	if err != nil {
 		utils.Exit("Error cleaning cache")
 	}

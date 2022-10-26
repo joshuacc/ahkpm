@@ -14,6 +14,7 @@ import (
 type PackagesRepository interface {
 	CopyPackage(dep Dependency, path string) error
 	GetPackageDependencies(dep Dependency) ([]Dependency, error)
+	ClearCache() error
 }
 
 type packagesRepository struct{}
