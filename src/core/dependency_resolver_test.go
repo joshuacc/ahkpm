@@ -3,6 +3,7 @@ package core_test
 import (
 	. "ahkpm/src/core"
 	"ahkpm/src/mocks"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -86,6 +87,40 @@ func TestResolveWithConflictingChildDepencyVersions(t *testing.T) {
 	mockPR.On("GetPackageDependencies", deps[1]).Return(bDeps, nil)
 	mockPR.On("GetPackageDependencies", aDeps[0]).Return([]Dependency{}, nil)
 	mockPR.On("GetPackageDependencies", bDeps[0]).Return([]Dependency{}, nil)
+
+	dr.ReplacePackagesRepository(mockPR)
+
+	_, err := dr.Resolve(deps)
+
+	assert.Error(t, err)
+}
+
+func TestResolveWithErrorGettingPackageDependencies(t *testing.T) {
+	dr := NewDependencyResolver()
+	deps := []Dependency{
+		NewDependency("foo", NewVersion(SemVerExact, "1.2.3")),
+	}
+	mockPR := &mocks.MockPackagesRepository{}
+	mockPR.On("GetPackageDependencies", deps[0]).Return([]Dependency{}, errors.New("error getting package dependencies"))
+
+	dr.ReplacePackagesRepository(mockPR)
+
+	_, err := dr.Resolve(deps)
+
+	assert.Error(t, err)
+}
+
+func TestResolveWithErrorGettingPackageDependenciesForChildDependency(t *testing.T) {
+	dr := NewDependencyResolver()
+	deps := []Dependency{
+		NewDependency("foo", NewVersion(SemVerExact, "1.2.3")),
+	}
+	childDeps := []Dependency{
+		NewDependency("bar", NewVersion(SemVerExact, "1.2.3")),
+	}
+	mockPR := &mocks.MockPackagesRepository{}
+	mockPR.On("GetPackageDependencies", deps[0]).Return(childDeps, nil)
+	mockPR.On("GetPackageDependencies", childDeps[0]).Return([]Dependency{}, errors.New("error getting package dependencies"))
 
 	dr.ReplacePackagesRepository(mockPR)
 
