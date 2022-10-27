@@ -3,6 +3,7 @@ package core
 import (
 	"ahkpm/src/utils"
 	"encoding/json"
+	"errors"
 	"os"
 )
 
@@ -40,19 +41,28 @@ func (m *Manifest) String() string {
 	return string(jsonBytes)
 }
 
-func (m *Manifest) ReadFromFile() *Manifest {
-	jsonBytes, err := os.ReadFile("ahkpm.json")
+func ManifestFromCwd() *Manifest {
+	m, err := ManifestFromFile("ahkpm.json")
 	if err != nil {
-		utils.Exit("Error reading ahkpm.json")
-	}
-	err = json.Unmarshal(jsonBytes, &m)
-	if err != nil {
-		utils.Exit("Error unmarshalling ahkpm.json")
+		utils.Exit(err.Error())
 	}
 	return m
 }
 
-func (m Manifest) Save() Manifest {
+func ManifestFromFile(path string) (*Manifest, error) {
+	jsonBytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, errors.New("Error reading ahkpm.json at " + path)
+	}
+	m := NewManifest()
+	err = json.Unmarshal(jsonBytes, &m)
+	if err != nil {
+		return nil, errors.New("Error unmarshalling ahkpm.json")
+	}
+	return m, nil
+}
+
+func (m Manifest) SaveToCwd() Manifest {
 	jsonBytes, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		utils.Exit("Error marshalling ahkpm.json to bytes")
@@ -64,8 +74,16 @@ func (m Manifest) Save() Manifest {
 	return m
 }
 
-func (m *Manifest) Dependencies() map[string]string {
-	return m.dependencies
+func (m *Manifest) Dependencies() []Dependency {
+	deps := make([]Dependency, 0)
+	for name, versionString := range m.dependencies {
+		version, err := VersionFromSpecifier(versionString)
+		if err != nil {
+			utils.Exit("Error parsing version specifier " + versionString)
+		}
+		deps = append(deps, NewDependency(name, version))
+	}
+	return deps
 }
 
 func (m *Manifest) AddDependency(name string, version Version) Manifest {

@@ -172,7 +172,7 @@ var initCmd = &cobra.Command{
 			fmt.Println("")
 		}
 
-		manifest.Save()
+		manifest.SaveToCwd()
 	},
 }
 

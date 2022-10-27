@@ -33,14 +33,8 @@ var installCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			fmt.Println("Installing all dependencies")
-			dependencies := core.NewManifest().ReadFromFile().Dependencies
-			for dep, ver := range dependencies() {
-				v, err := core.VersionFromSpecifier(ver)
-				if err != nil {
-					utils.Exit(err.Error())
-				}
-				installer.InstallSinglePackage(dep, v)
-			}
+			dependencies := core.ManifestFromCwd().Dependencies()
+			installer.Install(dependencies)
 			return
 		}
 
@@ -63,7 +57,11 @@ var installCmd = &cobra.Command{
 			utils.Exit(err.Error())
 		}
 
-		installer.InstallSinglePackage(packageToInstall, version)
+		fmt.Println("Installing package", packageToInstall, "with", strings.ToLower(string(version.VersionKind())), version.Value())
+		manifest := core.ManifestFromCwd()
+		manifest.AddDependency(packageToInstall, version)
+		installer.Install(manifest.Dependencies())
+		manifest.SaveToCwd()
 	},
 }
 
