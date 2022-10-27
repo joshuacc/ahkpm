@@ -1,7 +1,8 @@
 package core
 
 type TreeNode[T any] struct {
-	Value    T
+	Value T
+	// TODO: Prevent direct access to this field so that children get their Parent field set correctly
 	Children []TreeNode[T]
 	Parent   *TreeNode[T]
 }
