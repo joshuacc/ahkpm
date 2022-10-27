@@ -45,10 +45,7 @@ func (r *resolver) Resolve(deps []Dependency) ([]TreeNode[Dependency], error) {
 			return nil, err
 		}
 
-		depNodes[i] = TreeNode[Dependency]{
-			Value:    dep,
-			Children: children,
-		}
+		depNodes[i] = NewTreeNode(dep).WithChildren(children)
 	}
 
 	err := checkForConflicts(depNodes)

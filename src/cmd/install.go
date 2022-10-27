@@ -33,13 +33,8 @@ var installCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			fmt.Println("Installing all dependencies")
-			dependencies := core.NewManifest().ReadFromCwd().Dependencies
-			for _, dep := range dependencies() {
-				if err != nil {
-					utils.Exit(err.Error())
-				}
-				installer.InstallSinglePackage(dep.Name(), dep.Version())
-			}
+			dependencies := core.ManifestFromCwd().Dependencies()
+			installer.Install(dependencies)
 			return
 		}
 

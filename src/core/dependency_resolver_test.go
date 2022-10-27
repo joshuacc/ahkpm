@@ -29,12 +29,8 @@ func TestResolveWithNoChildDependencies(t *testing.T) {
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []TreeNode[Dependency]{
-		{
-			Value:    deps[0],
-			Children: []TreeNode[Dependency]{},
-		},
-	}
+	expectedList := []TreeNode[Dependency]{NewTreeNode(deps[0])}
+
 	assert.NoError(t, err)
 	assert.Equal(t, expectedList, resolvedList)
 }
@@ -56,15 +52,10 @@ func TestResolveWithChildDependencies(t *testing.T) {
 	resolvedList, err := dr.Resolve(deps)
 
 	expectedList := []TreeNode[Dependency]{
-		{
-			Value: deps[0],
-			Children: []TreeNode[Dependency]{
-				{
-					Value:    childDeps[0],
-					Children: []TreeNode[Dependency]{},
-				},
-			},
-		},
+		NewTreeNode(deps[0]).
+			WithChildren(
+				[]TreeNode[Dependency]{NewTreeNode(childDeps[0])},
+			),
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, expectedList, resolvedList)

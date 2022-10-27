@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -36,7 +37,21 @@ func (pr *packagesRepository) CopyPackage(dep Dependency, path string) error {
 }
 
 func (pr *packagesRepository) GetPackageDependencies(dep Dependency) ([]Dependency, error) {
-	return []Dependency{}, nil
+	err := pr.ensurePackageIsReady(dep)
+	if err != nil {
+		return nil, err
+	}
+	manifestPath := pr.getPackageCacheDir(dep) + `/ahkpm.json`
+	manifest, err := ManifestFromFile(manifestPath)
+
+	deps := make([]Dependency, 0)
+	if err == nil {
+		deps = manifest.Dependencies()
+	} else if !strings.HasPrefix(err.Error(), "Error reading ahkpm.json") {
+		return nil, err
+	}
+
+	return deps, nil
 }
 
 func (pr *packagesRepository) ClearCache() error {
