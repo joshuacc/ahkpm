@@ -1,5 +1,7 @@
 # ahkpm - The AutoHotKey Package Manager.
 
+[![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
+
 [AutoHotKey][ahk] is a powerful tool for scripting automations on Windows,
 but managing dependencies for your scripts is painful.
 `ahkpm` intends to bring modern package management to AutoHotkey,
