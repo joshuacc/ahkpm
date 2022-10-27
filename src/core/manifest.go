@@ -62,7 +62,7 @@ func ManifestFromFile(path string) (*Manifest, error) {
 	return m, nil
 }
 
-func (m Manifest) Save() Manifest {
+func (m Manifest) SaveToCwd() Manifest {
 	jsonBytes, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		utils.Exit("Error marshalling ahkpm.json to bytes")
