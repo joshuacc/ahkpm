@@ -1,6 +1,6 @@
 # ahkpm - The AutoHotKey Package Manager.
 
-[![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
+[![build](https://github.com/joshuacc/ahkpm/workflows/build/badge.svg?branch=main)](https://github.com/joshuacc/ahkpm/actions/workflows/build.yml?query=branch%3Amain) [![Maintainability](https://api.codeclimate.com/v1/badges/d879856f8da1f8b803a6/maintainability)](https://codeclimate.com/github/joshuacc/ahkpm/maintainability) [![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
 
 [AutoHotKey][ahk] is a powerful tool for scripting automations on Windows,
 but managing dependencies for your scripts is painful.
@@ -99,3 +99,31 @@ See the [contribution guidelines](./CONTRIBUTING.md)
 [ahk]:https://www.autohotkey.com/
 [semver]:https://semver.org/
 [releases]:https://github.com/joshuacc/ahkpm/releases
+
+## ahkpm.lock
+
+```jsonc
+{
+    "lockFileVersion": 1,
+    // This should exactly match ahkpm.json unless it has been edited manually
+    "dependencies": {
+      "github.com/joshuacc/mock-ahkpm-package-a": "branch:main",
+    },
+    "resolved": {
+        "ahkpm-modules/github.com/joshuacc/mock-ahkpm-package-a": {
+            "version": "branch:main",
+            "gitSha": "c5b8f8d0d0d1e5c9a5f7f8b8b5c9a5f7f8b8b5c9a",
+            "repository": "github.com/joshuacc/mock-ahkpm-package-a",
+            "dependencies": {
+                "github.com/joshuacc/mock-ahkpm-package-b": "^1.0.0"
+            }
+        },
+        "ahkpm-modules/github.com/joshuacc/mock-ahkpm-package-a/ahkpm-modules/github.com/joshuacc/mock-ahkpm-package-b": {
+            "version": "1.0.2",
+            "repository": "github.com/joshuacc/mock-ahkpm-package-b",
+            "gitSha": "c5b8f8d0d0d1e5c9a5f7f8b8b5c9a5f7f8b8b5c9a",
+            "dependencies": {}
+        }
+    }
+}
+```
