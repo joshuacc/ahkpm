@@ -1,6 +1,6 @@
 # ahkpm - The AutoHotKey Package Manager.
 
-[![build](https://github.com/joshuacc/ahkpm/workflows/build/badge.svg?branch=main)](https://github.com/joshuacc/ahkpm/actions/workflows/build.yml?query=branch%3Amain) [![Maintainability](https://api.codeclimate.com/v1/badges/d879856f8da1f8b803a6/maintainability)](https://codeclimate.com/github/joshuacc/ahkpm/maintainability) [![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
+[![build](https://github.com/joshuacc/ahkpm/workflows/mage/badge.svg?branch=main)](https://github.com/joshuacc/ahkpm/actions/workflows/build.yml?query=branch%3Amain) [![Maintainability](https://api.codeclimate.com/v1/badges/d879856f8da1f8b803a6/maintainability)](https://codeclimate.com/github/joshuacc/ahkpm/maintainability) [![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
 
 [AutoHotKey][ahk] is a powerful tool for scripting automations on Windows,
 but managing dependencies for your scripts is painful.
