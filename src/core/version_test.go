@@ -30,7 +30,7 @@ func TestVersionFromString(t *testing.T) {
 			assert.Error(t, err)
 		} else {
 			assert.NoError(t, err)
-			assert.Equal(t, c.kind, v.VersionKind())
+			assert.Equal(t, c.kind, v.Kind())
 			assert.Equal(t, c.value, v.Value())
 		}
 	}

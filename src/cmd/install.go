@@ -57,7 +57,7 @@ var installCmd = &cobra.Command{
 			utils.Exit(err.Error())
 		}
 
-		fmt.Println("Installing package", packageToInstall, "with", strings.ToLower(string(version.VersionKind())), version.Value())
+		fmt.Println("Installing package", packageToInstall, "with", strings.ToLower(string(version.Kind())), version.Value())
 		manifest := core.ManifestFromCwd()
 		manifest.AddDependency(packageToInstall, version)
 		installer.Install(manifest.Dependencies())

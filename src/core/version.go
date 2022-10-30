@@ -7,7 +7,7 @@ import (
 )
 
 type Version interface {
-	VersionKind() VersionKind
+	Kind() VersionKind
 	Value() string
 	String() string
 }
@@ -26,9 +26,11 @@ const (
 	Commit      VersionKind = "Commit"
 )
 
+// NewVersion creates a new version with the given kind and value. It does *not*
+// check if the version is valid.
 func NewVersion(kind VersionKind, value string) Version {
 	return version{
-		kind:  VersionKind(kind),
+		kind:  kind,
 		value: value,
 	}
 }
@@ -68,7 +70,7 @@ func (v version) String() string {
 	return ""
 }
 
-func (v version) VersionKind() VersionKind {
+func (v version) Kind() VersionKind {
 	return v.kind
 }
 
