@@ -17,7 +17,7 @@ type Manifest struct {
 	License      string `json:"license"`
 	IssueTracker string `json:"issueTracker"`
 	Author       Person `json:"author"`
-	dependencies map[string]string
+	dependencies []Dependency
 }
 
 type Person struct {
@@ -29,7 +29,7 @@ type Person struct {
 func NewManifest() *Manifest {
 	return &Manifest{
 		Author:       Person{},
-		dependencies: make(map[string]string),
+		dependencies: []Dependency{},
 	}
 }
 
@@ -75,19 +75,25 @@ func (m Manifest) SaveToCwd() Manifest {
 }
 
 func (m *Manifest) Dependencies() []Dependency {
-	deps := make([]Dependency, 0)
-	for name, versionString := range m.dependencies {
-		version, err := VersionFromSpecifier(versionString)
-		if err != nil {
-			utils.Exit("Error parsing version specifier " + versionString)
-		}
-		deps = append(deps, NewDependency(name, version))
-	}
-	return deps
+	return m.dependencies
 }
 
 func (m *Manifest) AddDependency(name string, version Version) Manifest {
-	m.dependencies[name] = version.String()
+	newDep := NewDependency(name, version)
+
+	foundIndex := -1
+	for i, dep := range m.dependencies {
+		if dep.Name() == name {
+			foundIndex = i
+		}
+	}
+
+	if foundIndex == -1 {
+		m.dependencies = append(m.dependencies, newDep)
+	} else {
+		m.dependencies[foundIndex] = newDep
+	}
+
 	return *m
 }
 
@@ -102,19 +108,30 @@ func (m *Manifest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	m.dependencies = aux.Dependencies
+
+	for packageName, versionSpecifier := range aux.Dependencies {
+		dep, err := DependencyFromSpecifiers(packageName, versionSpecifier)
+		if err != nil {
+			return err
+		}
+		m.dependencies = append(m.dependencies, dep)
+	}
+
 	return nil
 }
 
 func (m Manifest) MarshalJSON() ([]byte, error) {
 	type Alias Manifest
-	foo := &struct {
+	aux := &struct {
 		*Alias
 		Dependencies map[string]string `json:"dependencies"`
 	}{
-		Alias:        (*Alias)(&m),
-		Dependencies: m.dependencies,
+		Alias: (*Alias)(&m),
+	}
+	aux.Dependencies = make(map[string]string)
+	for _, dep := range m.dependencies {
+		aux.Dependencies[dep.Name()] = dep.Version().String()
 	}
 
-	return json.Marshal(foo)
+	return json.Marshal(aux)
 }
