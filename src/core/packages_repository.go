@@ -13,8 +13,9 @@ import (
 )
 
 type PackagesRepository interface {
-	CopyPackage(dep Dependency, path string) error
-	GetPackageDependencies(dep Dependency) ([]Dependency, error)
+	CopyPackage(dep ResolvedDependency, path string) error
+	GetPackageDependencies(dep ResolvedDependency) ([]Dependency, error)
+	GetResolvedDependencySHA(dep Dependency) (string, error)
 	ClearCache() error
 }
 
@@ -24,24 +25,24 @@ func NewPackagesRepository() PackagesRepository {
 	return &packagesRepository{}
 }
 
-func (pr *packagesRepository) CopyPackage(dep Dependency, path string) error {
-	err := pr.ensurePackageIsReady(dep)
+func (pr *packagesRepository) CopyPackage(dep ResolvedDependency, path string) error {
+	err := pr.ensurePackageIsReady(dep.Name, dep.SHA)
 	if err != nil {
 		return err
 	}
-	err = copy.Copy(pr.getPackageCacheDir(dep), path)
+	err = copy.Copy(pr.getPackageCacheDir(dep.Name), path)
 	if err != nil {
 		return errors.New("Error copying package to target module directory")
 	}
 	return nil
 }
 
-func (pr *packagesRepository) GetPackageDependencies(dep Dependency) ([]Dependency, error) {
-	err := pr.ensurePackageIsReady(dep)
+func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) ([]Dependency, error) {
+	err := pr.ensurePackageIsReady(dep.Name, dep.SHA)
 	if err != nil {
 		return nil, err
 	}
-	manifestPath := pr.getPackageCacheDir(dep) + `/ahkpm.json`
+	manifestPath := pr.getPackageCacheDir(dep.Name) + `/ahkpm.json`
 	manifest, err := ManifestFromFile(manifestPath)
 
 	deps := make([]Dependency, 0)
@@ -52,6 +53,22 @@ func (pr *packagesRepository) GetPackageDependencies(dep Dependency) ([]Dependen
 	}
 
 	return deps, nil
+}
+
+func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, error) {
+	err := pr.ensurePackageIsReady(dep.Name(), dep.Version().Value())
+	if err != nil {
+		return "", err
+	}
+	repo, err := git.PlainOpen(pr.getPackageCacheDir(dep.Name()))
+	if err != nil {
+		return "", errors.New("Error opening package repository " + dep.Name())
+	}
+	ref, err := repo.Head()
+	if err != nil {
+		return "", errors.New("Error getting package repository HEAD" + dep.Name())
+	}
+	return ref.Hash().String(), nil
 }
 
 func (pr *packagesRepository) ClearCache() error {
@@ -66,12 +83,12 @@ func (pr *packagesRepository) getCacheDir() string {
 	return value + `\.ahkpm\cache`
 }
 
-func (pr *packagesRepository) getPackageCacheDir(dep Dependency) string {
-	return pr.getCacheDir() + `\` + dep.Name()
+func (pr *packagesRepository) getPackageCacheDir(depName string) string {
+	return pr.getCacheDir() + `\` + depName
 }
 
-func (pr *packagesRepository) ensurePackageIsReady(dep Dependency) error {
-	packageCacheDir := pr.getPackageCacheDir(dep)
+func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionString string) error {
+	packageCacheDir := pr.getPackageCacheDir(depName)
 
 	err := os.MkdirAll(packageCacheDir, os.ModePerm)
 	if err != nil {
@@ -86,13 +103,13 @@ func (pr *packagesRepository) ensurePackageIsReady(dep Dependency) error {
 	if !packageWasCloned {
 		// Clone the repository into the cache directory
 		_, err := git.PlainClone(packageCacheDir, false, &git.CloneOptions{
-			URL:               getGitUrl(dep.Name()),
+			URL:               getGitUrl(depName),
 			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 		})
 		if err != nil {
 			message := "Error cloning package"
 			if err.Error() == "authentication required" {
-				message = "Error downloading package " + dep.Name() + ". Are you sure that package exists?"
+				message = "Error downloading package " + depName + ". Are you sure that package exists?"
 			}
 			return errors.New(message)
 		}
@@ -109,11 +126,11 @@ func (pr *packagesRepository) ensurePackageIsReady(dep Dependency) error {
 		return errors.New("Error getting worktree")
 	}
 
-	hash, err := repo.ResolveRevision(plumbing.Revision(dep.Version().Value()))
+	hash, err := repo.ResolveRevision(plumbing.Revision(depVersionString))
 	if err != nil {
 		message := "Error resolving revision"
 		if err.Error() == "reference not found" {
-			message = "Could not find version " + dep.Version().String() + " for package " + dep.Name() + ". Are you sure that version exists?"
+			message = "Could not find version " + depVersionString + " for package " + depName + ". Are you sure that version exists?"
 		}
 		return errors.New(message)
 	}
@@ -139,4 +156,8 @@ func (pr *packagesRepository) ensurePackageIsReady(dep Dependency) error {
 		}
 	}
 	return nil
+}
+
+func getGitUrl(packageName string) string {
+	return "https://" + packageName + ".git"
 }
