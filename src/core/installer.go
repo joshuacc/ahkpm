@@ -7,7 +7,7 @@ import (
 
 type Installer struct{}
 
-func (i Installer) Install(deps DepsArray) {
+func (i Installer) Install(deps DependencyArray) {
 	pr := NewPackagesRepository()
 
 	m := ManifestFromCwd()
