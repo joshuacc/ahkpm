@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -39,4 +41,16 @@ func FileExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func StructFromFile[T any](path string, s *T) (*T, error) {
+	jsonBytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, errors.New("Error reading ahkpm.json at " + path)
+	}
+	err = json.Unmarshal(jsonBytes, s)
+	if err != nil {
+		return nil, errors.New("Error unmarshalling ahkpm.json")
+	}
+	return s, nil
 }

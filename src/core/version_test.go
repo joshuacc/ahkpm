@@ -55,3 +55,22 @@ func TestVersionString(t *testing.T) {
 		assert.Equal(t, c.expected, v.String())
 	}
 }
+
+func TestVersionEquals(t *testing.T) {
+	type Case struct {
+		a        Version
+		b        Version
+		expected bool
+	}
+
+	cases := [4]Case{
+		{NewVersion(SemVerExact, "1.2.3"), NewVersion(SemVerExact, "1.2.3"), true},
+		{NewVersion(SemVerExact, "1.2.3"), NewVersion(SemVerExact, "1.2.4"), false},
+		{NewVersion(SemVerExact, "1.2.3"), NewVersion(Branch, "master"), false},
+		{NewVersion(Branch, "master"), NewVersion(Branch, "master"), true},
+	}
+
+	for _, c := range cases {
+		assert.Equal(t, c.expected, c.a.Equals(c.b))
+	}
+}

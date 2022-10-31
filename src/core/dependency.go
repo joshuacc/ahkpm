@@ -8,6 +8,7 @@ import (
 type Dependency interface {
 	Name() string
 	Version() Version
+	Equals(other Dependency) bool
 }
 
 type dependency struct {
@@ -50,6 +51,10 @@ func (d dependency) Version() Version {
 	return d.version
 }
 
+func (d dependency) Equals(other Dependency) bool {
+	return d.name == other.Name() && d.version.Equals(other.Version())
+}
+
 func isValidDependencyName(name string) bool {
 	isMatch, err := regexp.MatchString("^github\\.com\\/[\\w-\\.]+\\/[\\w-\\.]+$", name)
 	if err != nil {
@@ -57,4 +62,26 @@ func isValidDependencyName(name string) bool {
 	}
 
 	return isMatch
+}
+
+type DepsArray []Dependency
+
+func (deps DepsArray) Equals(other DepsArray) bool {
+	if len(deps) != len(other) {
+		return false
+	}
+
+	depMap := make(map[string]Dependency)
+	for _, dep := range deps {
+		depMap[dep.Name()] = dep
+	}
+
+	for _, otherDep := range other {
+		dep, ok := depMap[otherDep.Name()]
+		if !ok || !dep.Equals(otherDep) {
+			return false
+		}
+	}
+
+	return true
 }
