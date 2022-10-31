@@ -14,72 +14,147 @@ func TestResolveWithNoDependencies(t *testing.T) {
 	resolvedList, err := dr.Resolve([]Dependency{})
 
 	assert.NoError(t, err)
-	assert.Equal(t, []TreeNode[Dependency]{}, resolvedList)
+	assert.Equal(t, []TreeNode[ResolvedDependency]{}, resolvedList)
 }
 
 func TestResolveWithNoChildDependencies(t *testing.T) {
-	dr := NewDependencyResolver()
-	deps := []Dependency{
-		NewDependency("foo", NewVersion(SemVerExact, "1.2.3")),
-	}
 	mockPR := &mocks.MockPackagesRepository{}
-	mockPR.On("GetPackageDependencies", deps[0]).Return([]Dependency{}, nil)
-
-	dr.ReplacePackagesRepository(mockPR)
+	dr := NewDependencyResolver().WithPackagesRepository(mockPR)
+	deps := []Dependency{
+		NewDependency("github.com/ahkpm/ahkpm", NewVersion(SemVerExact, "1.2.3")),
+	}
+	partiallyResolvedDep := ResolvedDependency{
+		Name:    deps[0].Name(),
+		Version: deps[0].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedDep := partiallyResolvedDep.WithDependencies([]Dependency{})
+	fullyResolvedDep.InstallPath = "ahkpm-modules/github.com/ahkpm/ahkpm"
+	mockPR.On("GetResolvedDependencySHA", deps[0]).Return(partiallyResolvedDep.SHA, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedDep).Return([]Dependency{}, nil)
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []TreeNode[Dependency]{NewTreeNode(deps[0])}
+	expectedList := []TreeNode[ResolvedDependency]{
+		NewTreeNode(fullyResolvedDep),
+	}
 
 	assert.NoError(t, err)
-	assert.Equal(t, expectedList, resolvedList)
+	assert.EqualValues(t, expectedList, resolvedList)
 }
 
 func TestResolveWithChildDependencies(t *testing.T) {
-	dr := NewDependencyResolver()
-	deps := []Dependency{
-		NewDependency("foo", NewVersion(SemVerExact, "1.2.3")),
-	}
-	childDeps := []Dependency{
-		NewDependency("bar", NewVersion(SemVerExact, "1.2.3")),
-	}
 	mockPR := &mocks.MockPackagesRepository{}
-	mockPR.On("GetPackageDependencies", deps[0]).Return(childDeps, nil)
-	mockPR.On("GetPackageDependencies", childDeps[0]).Return([]Dependency{}, nil)
+	dr := NewDependencyResolver().WithPackagesRepository(mockPR)
+	deps := []Dependency{
+		NewDependency("github.com/ahkpm/ahkpm", NewVersion(SemVerExact, "1.2.3")),
+	}
+	partiallyResolvedDep := ResolvedDependency{
+		Name:    deps[0].Name(),
+		Version: deps[0].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedDep := partiallyResolvedDep.WithDependencies([]Dependency{})
+	fullyResolvedDep.InstallPath = "ahkpm-modules/github.com/ahkpm/ahkpm"
 
-	dr.ReplacePackagesRepository(mockPR)
+	childDeps := []Dependency{
+		NewDependency("github.com/abcd/abcd", NewVersion(SemVerExact, "1.2.3")),
+	}
+
+	partiallyResolvedChildDep := ResolvedDependency{
+		Name:    childDeps[0].Name(),
+		Version: childDeps[0].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedChildDep := partiallyResolvedChildDep.WithDependencies([]Dependency{})
+	fullyResolvedChildDep.InstallPath = "ahkpm-modules/github.com/ahkpm/ahkpm/ahkpm-modules/github.com/abcd/abcd"
+
+	mockPR.On("GetResolvedDependencySHA", deps[0]).Return(partiallyResolvedDep.SHA, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedChildDep).Return([]Dependency{}, nil)
+	mockPR.On("GetResolvedDependencySHA", childDeps[0]).Return(partiallyResolvedChildDep.SHA, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedDep).Return(childDeps, nil)
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []TreeNode[Dependency]{
-		NewTreeNode(deps[0]).
+	expectedList := []TreeNode[ResolvedDependency]{
+		NewTreeNode(fullyResolvedDep.WithDependencies(childDeps)).
 			WithChildren(
-				[]TreeNode[Dependency]{NewTreeNode(childDeps[0])},
+				[]TreeNode[ResolvedDependency]{NewTreeNode(fullyResolvedChildDep)},
 			),
 	}
 	assert.NoError(t, err)
-	assert.Equal(t, expectedList, resolvedList)
+	assert.EqualValues(t, expectedList[0].Value, resolvedList[0].Value)
+	assert.EqualValues(t, expectedList[0].Children[0].Value, resolvedList[0].Children[0].Value)
 }
 
 func TestResolveWithConflictingChildDepencyVersions(t *testing.T) {
-	dr := NewDependencyResolver()
+	mockPR := &mocks.MockPackagesRepository{}
+	dr := NewDependencyResolver().WithPackagesRepository(mockPR)
 	deps := []Dependency{
-		NewDependency("A", NewVersion(SemVerExact, "1.2.3")),
-		NewDependency("B", NewVersion(SemVerExact, "1.2.3")),
+		NewDependency("github.com/a/a", NewVersion(SemVerExact, "1.2.3")),
+		NewDependency("github.com/b/b", NewVersion(SemVerExact, "1.2.3")),
 	}
 	aDeps := []Dependency{
-		NewDependency("badDep", NewVersion(SemVerExact, "1.2.3")),
+		NewDependency("github.com/bad/dep", NewVersion(SemVerExact, "1.2.3")),
 	}
 	bDeps := []Dependency{
-		NewDependency("badDep", NewVersion(SemVerExact, "1.2.4")),
+		NewDependency("github.com/bad/dep", NewVersion(SemVerExact, "1.2.4")),
 	}
-	mockPR := &mocks.MockPackagesRepository{}
-	mockPR.On("GetPackageDependencies", deps[0]).Return(aDeps, nil)
-	mockPR.On("GetPackageDependencies", deps[1]).Return(bDeps, nil)
-	mockPR.On("GetPackageDependencies", aDeps[0]).Return([]Dependency{}, nil)
-	mockPR.On("GetPackageDependencies", bDeps[0]).Return([]Dependency{}, nil)
+	partiallyResolvedDepA := ResolvedDependency{
+		Name:    deps[0].Name(),
+		Version: deps[0].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedDepA := partiallyResolvedDepA.WithDependencies(aDeps)
+	fullyResolvedDepA.InstallPath = "ahkpm-modules/github.com/a/a"
 
-	dr.ReplacePackagesRepository(mockPR)
+	partiallyResolvedDepB := ResolvedDependency{
+		Name:    deps[1].Name(),
+		Version: deps[1].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedDepB := partiallyResolvedDepB.WithDependencies(bDeps)
+	fullyResolvedDepB.InstallPath = "ahkpm-modules/github.com/b/b"
+
+	partiallyResolvedChildDepA := ResolvedDependency{
+		Name:    aDeps[0].Name(),
+		Version: aDeps[0].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedChildDepA := partiallyResolvedChildDepA.WithDependencies([]Dependency{})
+	fullyResolvedChildDepA.InstallPath = "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/bad/dep"
+
+	partiallyResolvedChildDepB := ResolvedDependency{
+		Name:    bDeps[0].Name(),
+		Version: bDeps[0].Version().String(),
+		SHA:     "1234567890",
+	}
+	fullyResolvedChildDepB := partiallyResolvedChildDepB.WithDependencies([]Dependency{})
+	fullyResolvedChildDepB.InstallPath = "ahkpm-modules/github.com/b/b/ahkpm-modules/github.com/bad/dep"
+
+	mockPR.On("GetResolvedDependencySHA", deps[0]).Return(partiallyResolvedDepA.SHA, nil)
+	mockPR.On("GetResolvedDependencySHA", deps[1]).Return(partiallyResolvedDepB.SHA, nil)
+	mockPR.On("GetResolvedDependencySHA", aDeps[0]).Return(partiallyResolvedChildDepA.SHA, nil)
+	mockPR.On("GetResolvedDependencySHA", bDeps[0]).Return(partiallyResolvedChildDepB.SHA, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedDepA).Return(aDeps, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedDepB).Return(bDeps, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedChildDepA).Return([]Dependency{}, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedChildDepB).Return([]Dependency{}, nil)
+
+	_, err := dr.Resolve(deps)
+
+	assert.Error(t, err)
+}
+
+func TestResolveWithErrorGettingDependencySHA(t *testing.T) {
+	mockPR := &mocks.MockPackagesRepository{}
+	dr := NewDependencyResolver().WithPackagesRepository(mockPR)
+
+	deps := []Dependency{
+		NewDependency("github.com/a/a", NewVersion(SemVerExact, "1.2.3")),
+	}
+
+	mockPR.On("GetResolvedDependencySHA", deps[0]).Return("", errors.New("error getting SHA"))
 
 	_, err := dr.Resolve(deps)
 
@@ -87,33 +162,20 @@ func TestResolveWithConflictingChildDepencyVersions(t *testing.T) {
 }
 
 func TestResolveWithErrorGettingPackageDependencies(t *testing.T) {
-	dr := NewDependencyResolver()
-	deps := []Dependency{
-		NewDependency("foo", NewVersion(SemVerExact, "1.2.3")),
-	}
 	mockPR := &mocks.MockPackagesRepository{}
-	mockPR.On("GetPackageDependencies", deps[0]).Return([]Dependency{}, errors.New("error getting package dependencies"))
+	dr := NewDependencyResolver().WithPackagesRepository(mockPR)
 
-	dr.ReplacePackagesRepository(mockPR)
-
-	_, err := dr.Resolve(deps)
-
-	assert.Error(t, err)
-}
-
-func TestResolveWithErrorGettingPackageDependenciesForChildDependency(t *testing.T) {
-	dr := NewDependencyResolver()
 	deps := []Dependency{
-		NewDependency("foo", NewVersion(SemVerExact, "1.2.3")),
+		NewDependency("github.com/a/a", NewVersion(SemVerExact, "1.2.3")),
 	}
-	childDeps := []Dependency{
-		NewDependency("bar", NewVersion(SemVerExact, "1.2.3")),
+	partiallyResolvedDep := ResolvedDependency{
+		Name:    deps[0].Name(),
+		Version: deps[0].Version().String(),
+		SHA:     "1234567890",
 	}
-	mockPR := &mocks.MockPackagesRepository{}
-	mockPR.On("GetPackageDependencies", deps[0]).Return(childDeps, nil)
-	mockPR.On("GetPackageDependencies", childDeps[0]).Return([]Dependency{}, errors.New("error getting package dependencies"))
 
-	dr.ReplacePackagesRepository(mockPR)
+	mockPR.On("GetResolvedDependencySHA", deps[0]).Return(partiallyResolvedDep.SHA, nil)
+	mockPR.On("GetPackageDependencies", partiallyResolvedDep).Return([]Dependency{}, errors.New("error getting package dependencies"))
 
 	_, err := dr.Resolve(deps)
 

@@ -11,7 +11,7 @@ func NewTreeNode[T any](value T) TreeNode[T] {
 	return TreeNode[T]{
 		Parent:   nil,
 		Value:    value,
-		Children: []TreeNode[T]{},
+		Children: make([]TreeNode[T], 0),
 	}
 }
 
@@ -48,6 +48,16 @@ func (n TreeNode[T]) ForEach(callback func(n TreeNode[T]) error) error {
 	}
 
 	return nil
+}
+
+func (n TreeNode[T]) Map(callback func(n TreeNode[T]) TreeNode[T]) TreeNode[T] {
+	newN := callback(n)
+
+	for i, child := range n.Children {
+		n.Children[i] = child.Map(callback)
+	}
+
+	return newN
 }
 
 func (n TreeNode[T]) WithChildren(children []TreeNode[T]) TreeNode[T] {
