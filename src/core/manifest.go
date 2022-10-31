@@ -3,7 +3,6 @@ package core
 import (
 	"ahkpm/src/utils"
 	"encoding/json"
-	"errors"
 	"os"
 )
 
@@ -50,16 +49,8 @@ func ManifestFromCwd() *Manifest {
 }
 
 func ManifestFromFile(path string) (*Manifest, error) {
-	jsonBytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, errors.New("Error reading ahkpm.json at " + path)
-	}
 	m := NewManifest()
-	err = json.Unmarshal(jsonBytes, &m)
-	if err != nil {
-		return nil, errors.New("Error unmarshalling ahkpm.json")
-	}
-	return m, nil
+	return utils.StructFromFile(path, m)
 }
 
 func (m Manifest) SaveToCwd() Manifest {

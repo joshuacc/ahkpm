@@ -8,6 +8,7 @@ import (
 type Dependency interface {
 	Name() string
 	Version() Version
+	Equals(other Dependency) bool
 }
 
 type dependency struct {
@@ -48,6 +49,10 @@ func (d dependency) Name() string {
 
 func (d dependency) Version() Version {
 	return d.version
+}
+
+func (d dependency) Equals(other Dependency) bool {
+	return d.name == other.Name() && d.version.Equals(other.Version())
 }
 
 func isValidDependencyName(name string) bool {

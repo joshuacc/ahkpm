@@ -10,6 +10,7 @@ type Version interface {
 	Kind() VersionKind
 	Value() string
 	String() string
+	Equals(other Version) bool
 }
 
 type version struct {
@@ -63,11 +64,7 @@ func (v version) String() string {
 	if v.kind == Branch || v.kind == Tag || v.kind == Commit {
 		return strings.ToLower(string(v.kind)) + ":" + v.value
 	}
-	if v.kind == SemVerExact {
-		return v.value
-	}
-	utils.Exit("Invalid version kind " + string(v.kind))
-	return ""
+	return v.value
 }
 
 func (v version) Kind() VersionKind {
@@ -76,4 +73,8 @@ func (v version) Kind() VersionKind {
 
 func (v version) Value() string {
 	return v.value
+}
+
+func (v version) Equals(other Version) bool {
+	return v.kind == other.Kind() && v.value == other.Value()
 }

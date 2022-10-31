@@ -7,8 +7,23 @@ import (
 
 type Installer struct{}
 
-func (i Installer) Install(deps []Dependency) {
+func (i Installer) Install(deps DependencyArray) {
 	pr := NewPackagesRepository()
+
+	m := ManifestFromCwd()
+	if deps.Equals(m.Dependencies()) {
+		lm := LockManifestFromCwd()
+		os.RemoveAll("ahkpm-modules")
+		for _, resolvedDep := range lm.Resolved {
+			err := pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
+			if err != nil {
+				utils.Exit(err.Error())
+			}
+		}
+
+		return
+	}
+
 	resolver := NewDependencyResolver()
 	resolvedDepTree, err := resolver.Resolve(deps)
 	if err != nil {
