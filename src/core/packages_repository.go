@@ -48,7 +48,7 @@ func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) ([]
 	deps := make([]Dependency, 0)
 	if err == nil {
 		deps = manifest.Dependencies()
-	} else if !strings.HasPrefix(err.Error(), "Error reading ahkpm.json") {
+	} else if !strings.HasPrefix(err.Error(), "Error reading") {
 		return nil, err
 	}
 

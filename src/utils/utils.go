@@ -46,11 +46,11 @@ func FileExists(path string) (bool, error) {
 func StructFromFile[T any](path string, s *T) (*T, error) {
 	jsonBytes, err := os.ReadFile(path)
 	if err != nil {
-		return nil, errors.New("Error reading ahkpm.json at " + path)
+		return nil, errors.New("Error reading " + path)
 	}
 	err = json.Unmarshal(jsonBytes, s)
 	if err != nil {
-		return nil, errors.New("Error unmarshalling ahkpm.json")
+		return nil, errors.New("Error unmarshalling " + path)
 	}
 	return s, nil
 }
