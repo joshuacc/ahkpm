@@ -4,7 +4,9 @@
 package main
 
 import (
+	"errors"
 	"os"
+	"strings"
 
 	"github.com/magefile/mage/sh"
 	"github.com/princjef/mageutil/bintool"
@@ -67,4 +69,32 @@ func Verify() error {
 // GitHub actions has Wix installed by default, but go-msi must be installed.
 func Msi(version string) error {
 	return sh.Run("go-msi", "make", "--src", "wix-templates", "--msi", "bin/ahkpm-"+version+".msi", "--version", version)
+}
+
+func VerifyVersion(version string) error {
+	out, err := sh.Output("bin/ahkpm.exe", "version")
+	if err != nil {
+		return err
+	}
+
+	if !strings.Contains(out, "ahkpm version: "+version) {
+		return errors.New("Version mismatch.\n    Expected: " + version + "\n    Actual: " + out)
+	}
+
+	return nil
+}
+
+func BuildRelease(version string) error {
+	if err := BuildWithVersion(version); err != nil {
+		return err
+	}
+
+	if err := VerifyVersion(version); err != nil {
+		return err
+	}
+
+	if err := Msi(version); err != nil {
+		return err
+	}
+	return nil
 }
