@@ -1,6 +1,6 @@
 # ahkpm - The AutoHotKey Package Manager.
 
-[![build](https://github.com/joshuacc/ahkpm/workflows/mage/badge.svg?branch=main)](https://github.com/joshuacc/ahkpm/actions/workflows/build.yml?query=branch%3Amain) [![Maintainability](https://api.codeclimate.com/v1/badges/d879856f8da1f8b803a6/maintainability)](https://codeclimate.com/github/joshuacc/ahkpm/maintainability) [![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/joshuacc/ahkpm?color=blue&sort=semver)](https://github.com/joshuacc/ahkpm/releases) [![build](https://github.com/joshuacc/ahkpm/workflows/mage/badge.svg?branch=main)](https://github.com/joshuacc/ahkpm/actions/workflows/build.yml?query=branch%3Amain) [![Maintainability](https://api.codeclimate.com/v1/badges/d879856f8da1f8b803a6/maintainability)](https://codeclimate.com/github/joshuacc/ahkpm/maintainability) [![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
 
 [AutoHotKey][ahk] is a powerful tool for scripting automations on Windows,
 but managing dependencies for your scripts is painful.
@@ -19,6 +19,7 @@ Available Commands:
   help         Help about any command
   init         Interactively create an ahkpm.json file in the current directory
   install      Installs either the specified package or all packages listed in ahkpm.json
+  version      Get the version of ahkpm
 
 Flags:
   -h, --help   help for ahkpm
@@ -54,10 +55,8 @@ ahkpm is being actively developed, but it is still a young project.
 As a result it has the following limitations.
 
 - It only supports hosting and downloading of packages on GitHub, though other git hosts will be supported in the future.
-- It doesn't (yet) resolve dependencies of dependencies, so it isn't (yet) useful for managing the dependencies of a reusable AHK library.
 - It doesn't (yet) support specifying version ranges as you can in npm and other package managers.
-- It is not (yet) conveniently packaged into a Windows installer
-- It doesn't (yet) have a lockfile like other package managers, which means that your dependency's code can unexpectedly change out from under you when you run `ahkpm install` to reinstall it, especially if you do something like specifying a `branch:` version.
+- The lockfile only guides installations [when top-level dependencies haven't changed](https://github.com/joshuacc/ahkpm/issues/75).
 
 If you'd like to help remedy these limitations, consider contributing!
 
