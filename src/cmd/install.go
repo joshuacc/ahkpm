@@ -44,22 +44,17 @@ var installCmd = &cobra.Command{
 			return
 		}
 
-		packageToInstall := args[0]
-		var versionSpecifier string
-		if strings.Contains(packageToInstall, "@") {
-			splitArg := strings.SplitN(packageToInstall, "@", 2)
-			packageToInstall = splitArg[0]
-			versionSpecifier = splitArg[1]
-		}
-
-		version, err := core.VersionFromSpecifier(versionSpecifier)
+		newDep, err := core.DependencyFromSpecifier(args[0])
 		if err != nil {
 			utils.Exit(err.Error())
 		}
 
-		fmt.Println("Installing package", packageToInstall, "with", strings.ToLower(string(version.Kind())), version.Value())
+		fmt.Println(
+			"Installing package", newDep.Name(),
+			"with", strings.ToLower(string(newDep.Version().Kind())), newDep.Version().Value(),
+		)
 		manifest := core.ManifestFromCwd()
-		manifest.AddDependency(packageToInstall, version)
+		manifest.AddDependency(newDep)
 		installer.Install(manifest.Dependencies())
 		manifest.SaveToCwd()
 	},

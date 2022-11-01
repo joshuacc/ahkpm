@@ -31,6 +31,19 @@ func TestDependencyFromSpecifiersWithInvalidInputs(t *testing.T) {
 	assert.Nil(t, dep2)
 }
 
+func TestDependencyFromSpecifier(t *testing.T) {
+	dep, err := DependencyFromSpecifier("github.com/ahkpm/ahkpm@branch:main")
+	assert.Nil(t, err)
+	assert.Equal(t, "github.com/ahkpm/ahkpm", dep.Name())
+	assert.Equal(t, "branch:main", dep.Version().String())
+}
+
+func TestDependencyFromSpecifierWithInvalidInputs(t *testing.T) {
+	dep1, err1 := DependencyFromSpecifier("github.com/ahkpm/ahkpm")
+	assert.NotNil(t, err1)
+	assert.Nil(t, dep1)
+}
+
 func TestEquals(t *testing.T) {
 	cases := []struct {
 		dep1    Dependency
