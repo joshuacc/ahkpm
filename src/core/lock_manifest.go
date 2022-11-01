@@ -118,12 +118,12 @@ func (lm LockManifest) SaveToCwd() LockManifest {
 	return lm
 }
 
-func LockManifestFromCwd() *LockManifest {
+func LockManifestFromCwd() (*LockManifest, error) {
 	lm, err := LockManifestFromFile("ahkpm.lock")
 	if err != nil {
-		utils.Exit(err.Error())
+		return nil, err
 	}
-	return lm
+	return lm, nil
 }
 
 func LockManifestFromFile(path string) (*LockManifest, error) {
