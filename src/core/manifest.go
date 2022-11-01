@@ -69,12 +69,10 @@ func (m *Manifest) Dependencies() []Dependency {
 	return m.dependencies
 }
 
-func (m *Manifest) AddDependency(name string, version Version) Manifest {
-	newDep := NewDependency(name, version)
-
+func (m *Manifest) AddDependency(newDep Dependency) Manifest {
 	foundIndex := -1
 	for i, dep := range m.dependencies {
-		if dep.Name() == name {
+		if dep.Name() == newDep.Name() {
 			foundIndex = i
 		}
 	}

@@ -31,5 +31,7 @@ func TestDependencyArrayEquals(t *testing.T) {
 		NewDependency("github.com/b/b", NewVersion(Branch, "beta")),
 	}
 
+	assert.False(t, oneA.Equals(twoA))
+
 	assert.False(t, twoA.Equals(twoB))
 }

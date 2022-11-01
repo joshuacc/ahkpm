@@ -19,7 +19,7 @@ func TestAddDependency(t *testing.T) {
 	m := NewManifest()
 	version := NewVersion("branch", "main")
 	dep := NewDependency("github.com/ahkpm/ahkpm", version)
-	m.AddDependency(dep.Name(), dep.Version())
+	m.AddDependency(dep)
 	assert.Equal(t, []Dependency{dep}, m.Dependencies())
 }
 
@@ -27,8 +27,8 @@ func TestAddDependencyWithExistingDependency(t *testing.T) {
 	m := NewManifest()
 	version := NewVersion("branch", "main")
 	dep := NewDependency("github.com/ahkpm/ahkpm", version)
-	m.AddDependency(dep.Name(), dep.Version())
-	m.AddDependency(dep.Name(), dep.Version())
+	m.AddDependency(dep)
+	m.AddDependency(dep)
 	assert.Equal(t, []Dependency{dep}, m.Dependencies())
 }
 
@@ -47,7 +47,7 @@ func TestMarshalJSON(t *testing.T) {
 		Website: "https://en.wikipedia.org/wiki/Thomas_Aquinas",
 	}
 	dep := NewDependency("github.com/ahkpm/ahkpm", NewVersion("Branch", "main"))
-	m.AddDependency(dep.Name(), dep.Version())
+	m.AddDependency(dep)
 	jsonBytes, err := json.MarshalIndent(m, "", "  ")
 	assert.Nil(t, err)
 

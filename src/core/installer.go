@@ -2,6 +2,7 @@ package core
 
 import (
 	"ahkpm/src/utils"
+	"fmt"
 	"os"
 )
 
@@ -10,9 +11,9 @@ type Installer struct{}
 func (i Installer) Install(deps DependencyArray) {
 	pr := NewPackagesRepository()
 
-	m := ManifestFromCwd()
-	if deps.Equals(m.Dependencies()) {
-		lm := LockManifestFromCwd()
+	lm := LockManifestFromCwd()
+	if deps.Equals(lm.Dependencies()) {
+		fmt.Println("No dependency changes found. Installing from lockfile.")
 		os.RemoveAll("ahkpm-modules")
 		for _, resolvedDep := range lm.Resolved {
 			err := pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)

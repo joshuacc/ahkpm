@@ -2,7 +2,9 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
+	"strings"
 )
 
 type Dependency interface {
@@ -41,6 +43,18 @@ func DependencyFromSpecifiers(name string, versionSpecifier string) (Dependency,
 		name:    name,
 		version: version,
 	}, nil
+}
+
+func DependencyFromSpecifier(specifier string) (Dependency, error) {
+	if !strings.Contains(specifier, "@") {
+		return nil, fmt.Errorf("Invalid dependency specifier: %s", specifier)
+	}
+
+	splitSpecifier := strings.SplitN(specifier, "@", 2)
+	packageName := splitSpecifier[0]
+	versionSpecifier := splitSpecifier[1]
+
+	return DependencyFromSpecifiers(packageName, versionSpecifier)
 }
 
 func (d dependency) Name() string {
