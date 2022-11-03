@@ -1,0 +1,15 @@
+# This action triggers a new build of the ahkpm.dev documentation site so that
+# it can rebuild with the latest version numbers, release links, etc.
+name: redeploy docs
+on: 
+  release:
+    types: [released]
+
+jobs:
+  build:
+    name: redeploy docs
+    runs-on: ubuntu latest
+
+    steps:
+      - run: curl -X POST -d {} $AHKPM_DEV_BUILD_HOOK
+
