@@ -10,7 +10,7 @@ type DependencyResolver interface {
 	// more than once, the specified versions are compared. In the case of a conflict,
 	// an error is returned. For the time being, any difference in versions is
 	// considered a conflict.
-	Resolve(deps []Dependency) (resolvedDependencies []TreeNode[ResolvedDependency], err error)
+	Resolve(deps DependencySet) (resolvedDependencies []TreeNode[ResolvedDependency], err error)
 
 	// WithPackagesRepository is used for testing
 	WithPackagesRepository(pr PackagesRepository) DependencyResolver
@@ -26,8 +26,8 @@ func NewDependencyResolver() DependencyResolver {
 	}
 }
 
-func (r *resolver) Resolve(deps []Dependency) ([]TreeNode[ResolvedDependency], error) {
-	if len(deps) == 0 {
+func (r *resolver) Resolve(deps DependencySet) ([]TreeNode[ResolvedDependency], error) {
+	if deps.Len() == 0 {
 		return []TreeNode[ResolvedDependency]{}, nil
 	}
 
@@ -54,21 +54,21 @@ func (r *resolver) Resolve(deps []Dependency) ([]TreeNode[ResolvedDependency], e
 	return depNodesWithInstallPath, nil
 }
 
-func (r *resolver) innerResolve(deps []Dependency) ([]TreeNode[ResolvedDependency], error) {
-	if len(deps) == 0 {
+func (r *resolver) innerResolve(depSet DependencySet) ([]TreeNode[ResolvedDependency], error) {
+	if depSet.Len() == 0 {
 		return []TreeNode[ResolvedDependency]{}, nil
 	}
 
-	resolvedDepNodes := make([]TreeNode[ResolvedDependency], len(deps))
+	resolvedDepNodes := make([]TreeNode[ResolvedDependency], depSet.Len())
 
 	// For each dependency, get its transitive dependencies.
-	for i, dep := range deps {
+	for i, dep := range depSet.AsArray() {
 		partiallyResolvedDepNode, err := getResolvedDependency(r.packagesRepository, NewTreeNode(dep))
 		if err != nil {
 			return nil, err
 		}
 
-		children, err := r.innerResolve(partiallyResolvedDepNode.Value.Dependencies())
+		children, err := r.innerResolve(partiallyResolvedDepNode.Value.Dependencies)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +127,7 @@ func getResolvedDependency(pr PackagesRepository, depNode TreeNode[Dependency]) 
 		return nil, err
 	}
 
-	resolvedNode := NewTreeNode(resolved.WithDependencies(childDependencies))
+	resolvedNode := NewTreeNode(resolved.WithDependencies(*childDependencies))
 
 	return &resolvedNode, nil
 }
