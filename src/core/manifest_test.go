@@ -12,24 +12,7 @@ func TestNewManifest(t *testing.T) {
 	m := NewManifest()
 	assert.IsType(t, &Manifest{}, m)
 	assert.Equal(t, Person{}, m.Author)
-	assert.Equal(t, []Dependency{}, m.Dependencies())
-}
-
-func TestAddDependency(t *testing.T) {
-	m := NewManifest()
-	version := NewVersion("branch", "main")
-	dep := NewDependency("github.com/ahkpm/ahkpm", version)
-	m.AddDependency(dep)
-	assert.Equal(t, []Dependency{dep}, m.Dependencies())
-}
-
-func TestAddDependencyWithExistingDependency(t *testing.T) {
-	m := NewManifest()
-	version := NewVersion("branch", "main")
-	dep := NewDependency("github.com/ahkpm/ahkpm", version)
-	m.AddDependency(dep)
-	m.AddDependency(dep)
-	assert.Equal(t, []Dependency{dep}, m.Dependencies())
+	assert.Equal(t, NewDependencySet(), m.Dependencies)
 }
 
 func TestMarshalJSON(t *testing.T) {
@@ -47,7 +30,7 @@ func TestMarshalJSON(t *testing.T) {
 		Website: "https://en.wikipedia.org/wiki/Thomas_Aquinas",
 	}
 	dep := NewDependency("github.com/ahkpm/ahkpm", NewVersion("Branch", "main"))
-	m.AddDependency(dep)
+	m.Dependencies.AddDependency(dep)
 	jsonBytes, err := json.MarshalIndent(m, "", "  ")
 	assert.Nil(t, err)
 

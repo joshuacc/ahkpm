@@ -33,7 +33,7 @@ var installCmd = &cobra.Command{
 
 		if len(args) == 0 {
 			fmt.Println("Installing all dependencies")
-			dependencies := core.ManifestFromCwd().Dependencies()
+			dependencies := core.ManifestFromCwd().Dependencies
 			installer.Install(dependencies)
 			return
 		}
@@ -54,8 +54,8 @@ var installCmd = &cobra.Command{
 			"with", strings.ToLower(string(newDep.Version().Kind())), newDep.Version().Value(),
 		)
 		manifest := core.ManifestFromCwd()
-		manifest.AddDependency(newDep)
-		installer.Install(manifest.Dependencies())
+		manifest.Dependencies.AddDependency(newDep)
+		installer.Install(manifest.Dependencies)
 		manifest.SaveToCwd()
 	},
 }

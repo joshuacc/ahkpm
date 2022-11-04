@@ -16,9 +16,9 @@ func (m *MockPackagesRepository) CopyPackage(dep ResolvedDependency, path string
 	return args.Error(1)
 }
 
-func (m *MockPackagesRepository) GetPackageDependencies(dep ResolvedDependency) ([]Dependency, error) {
+func (m *MockPackagesRepository) GetPackageDependencies(dep ResolvedDependency) (*DependencySet, error) {
 	args := m.Called(dep)
-	return args.Get(0).([]Dependency), args.Error(1)
+	return args.Get(0).(*DependencySet), args.Error(1)
 }
 
 func (m *MockPackagesRepository) GetResolvedDependencySHA(dep Dependency) (string, error) {

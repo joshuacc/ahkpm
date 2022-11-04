@@ -8,15 +8,15 @@ import (
 
 // Manifest contains the data from ahkpm.json
 type Manifest struct {
-	Name         string `json:"name"`
-	Version      string `json:"version"`
-	Description  string `json:"description"`
-	Repository   string `json:"repository"`
-	Website      string `json:"website"`
-	License      string `json:"license"`
-	IssueTracker string `json:"issueTracker"`
-	Author       Person `json:"author"`
-	dependencies []Dependency
+	Name         string        `json:"name"`
+	Version      string        `json:"version"`
+	Description  string        `json:"description"`
+	Repository   string        `json:"repository"`
+	Website      string        `json:"website"`
+	License      string        `json:"license"`
+	IssueTracker string        `json:"issueTracker"`
+	Author       Person        `json:"author"`
+	Dependencies DependencySet `json:"dependencies"`
 }
 
 type Person struct {
@@ -28,7 +28,7 @@ type Person struct {
 func NewManifest() *Manifest {
 	return &Manifest{
 		Author:       Person{},
-		dependencies: []Dependency{},
+		Dependencies: NewDependencySet(),
 	}
 }
 
@@ -63,64 +63,4 @@ func (m Manifest) SaveToCwd() Manifest {
 		utils.Exit("Error writing ahkpm.json")
 	}
 	return m
-}
-
-func (m *Manifest) Dependencies() []Dependency {
-	return m.dependencies
-}
-
-func (m *Manifest) AddDependency(newDep Dependency) Manifest {
-	foundIndex := -1
-	for i, dep := range m.dependencies {
-		if dep.Name() == newDep.Name() {
-			foundIndex = i
-		}
-	}
-
-	if foundIndex == -1 {
-		m.dependencies = append(m.dependencies, newDep)
-	} else {
-		m.dependencies[foundIndex] = newDep
-	}
-
-	return *m
-}
-
-func (m *Manifest) UnmarshalJSON(data []byte) error {
-	type Alias Manifest
-	aux := &struct {
-		Dependencies map[string]string `json:"dependencies"`
-		*Alias
-	}{
-		Alias: (*Alias)(m),
-	}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-
-	for packageName, versionSpecifier := range aux.Dependencies {
-		dep, err := DependencyFromSpecifiers(packageName, versionSpecifier)
-		if err != nil {
-			return err
-		}
-		m.dependencies = append(m.dependencies, dep)
-	}
-
-	return nil
-}
-
-func (m Manifest) MarshalJSON() ([]byte, error) {
-	type Alias Manifest
-	aux := &struct {
-		*Alias
-		Dependencies map[string]string `json:"dependencies"`
-	}{
-		Alias: (*Alias)(&m),
-	}
-	aux.Dependencies = make(map[string]string)
-	for _, dep := range m.dependencies {
-		aux.Dependencies[dep.Name()] = dep.Version().String()
-	}
-
-	return json.Marshal(aux)
 }

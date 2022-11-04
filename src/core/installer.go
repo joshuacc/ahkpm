@@ -8,11 +8,11 @@ import (
 
 type Installer struct{}
 
-func (i Installer) Install(deps DependencyArray) {
+func (i Installer) Install(deps DependencySet) {
 	pr := NewPackagesRepository()
 
 	lm, err := LockManifestFromCwd()
-	if err == nil && deps.Equals(lm.Dependencies()) {
+	if err == nil && deps.Equals(lm.Dependencies) {
 		fmt.Println("No dependency changes found. Installing from lockfile.")
 		os.RemoveAll("ahkpm-modules")
 		for _, resolvedDep := range lm.Resolved {

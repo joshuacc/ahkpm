@@ -50,7 +50,8 @@ func StructFromFile[T any](path string, s *T) (*T, error) {
 	}
 	err = json.Unmarshal(jsonBytes, s)
 	if err != nil {
-		return nil, errors.New("Error unmarshalling " + path)
+		panic(err)
+		//return nil, errors.New("Error unmarshalling " + path)
 	}
 	return s, nil
 }

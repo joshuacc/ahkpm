@@ -14,7 +14,7 @@ import (
 
 type PackagesRepository interface {
 	CopyPackage(dep ResolvedDependency, path string) error
-	GetPackageDependencies(dep ResolvedDependency) ([]Dependency, error)
+	GetPackageDependencies(dep ResolvedDependency) (*DependencySet, error)
 	GetResolvedDependencySHA(dep Dependency) (string, error)
 	ClearCache() error
 }
@@ -37,7 +37,7 @@ func (pr *packagesRepository) CopyPackage(dep ResolvedDependency, path string) e
 	return nil
 }
 
-func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) ([]Dependency, error) {
+func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) (*DependencySet, error) {
 	err := pr.ensurePackageIsReady(dep.Name, dep.SHA)
 	if err != nil {
 		return nil, err
@@ -45,14 +45,14 @@ func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) ([]
 	manifestPath := pr.getPackageCacheDir(dep.Name) + `/ahkpm.json`
 	manifest, err := ManifestFromFile(manifestPath)
 
-	deps := make([]Dependency, 0)
+	deps := NewDependencySet()
 	if err == nil {
-		deps = manifest.Dependencies()
+		deps = manifest.Dependencies
 	} else if !strings.HasPrefix(err.Error(), "Error reading") {
-		return nil, err
+		return &deps, err
 	}
 
-	return deps, nil
+	return &deps, nil
 }
 
 func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, error) {
