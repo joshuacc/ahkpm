@@ -23,7 +23,7 @@ func Lint() error {
 		return err
 	}
 
-	return linter.Command("run").Run()
+	return linter.Command("run --timeout=5m").Run()
 }
 
 func Test() error {
