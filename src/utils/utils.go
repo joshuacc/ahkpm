@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
 )
 
@@ -54,4 +55,30 @@ func StructFromFile[T any](path string, s *T) (*T, error) {
 		//return nil, errors.New("Error unmarshalling " + path)
 	}
 	return s, nil
+}
+
+func GetAhkpmDir() string {
+	value, succeeded := os.LookupEnv("userprofile")
+	if !succeeded {
+		fmt.Println("Unable to get userprofile")
+		os.Exit(1)
+	}
+	return value + `\.ahkpm`
+}
+
+func GetAutoHotkeyVersion() (string, error) {
+	versionScript := `FileAppend, %A_AhkVersion%, *`
+	scriptPath := GetAhkpmDir() + `\version.ahk`
+	err := os.WriteFile(scriptPath, []byte(versionScript), 0644)
+	if err != nil {
+		return "", err
+	}
+
+	// The pipe to more is needed to get the output to stdout
+	out, err := exec.Command("autohotkey", scriptPath, "| more").Output()
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
 }
