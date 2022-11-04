@@ -81,11 +81,7 @@ func (pr *packagesRepository) ClearCache() error {
 }
 
 func (pr *packagesRepository) getCacheDir() string {
-	value, succeeded := os.LookupEnv("userprofile")
-	if !succeeded {
-		utils.Exit("Unable to get userprofile")
-	}
-	return value + `\.ahkpm\cache`
+	return utils.GetAhkpmDir() + `\cache`
 }
 
 func (pr *packagesRepository) getPackageCacheDir(depName string) string {
