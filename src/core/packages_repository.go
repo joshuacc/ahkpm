@@ -30,7 +30,12 @@ func (pr *packagesRepository) CopyPackage(dep ResolvedDependency, path string) e
 	if err != nil {
 		return err
 	}
-	err = copy.Copy(pr.getPackageCacheDir(dep.Name), path)
+	err = copy.Copy(pr.getPackageCacheDir(dep.Name), path, copy.Options{
+		// Skip the .git directory since it isn't needed at the destination
+		Skip: func(src string) (bool, error) {
+			return strings.HasSuffix(src, ".git"), nil
+		},
+	})
 	if err != nil {
 		return errors.New("Error copying package to target module directory")
 	}

@@ -1,6 +1,9 @@
 package core
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"sort"
+)
 
 type DependencySet struct {
 	_set map[string]Dependency
@@ -41,6 +44,10 @@ func (ds DependencySet) AsArray() []Dependency {
 		deps[i] = dep
 		i++
 	}
+	// Ensure that the array is sorted by name to maintain stability
+	sort.Slice(deps, func(i2, j int) bool {
+		return deps[i2].Name() < deps[j].Name()
+	})
 	return deps
 }
 
