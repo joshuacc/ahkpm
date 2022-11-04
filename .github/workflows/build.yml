@@ -32,7 +32,7 @@ jobs:
           key: ${{ hashFiles('magefile.go') }}
       
       - name: Run Mage
-        uses: magefile/mage-action@v2
+        uses: joshuacc/mage-action@master
         with:
           version: latest
           args: verify
