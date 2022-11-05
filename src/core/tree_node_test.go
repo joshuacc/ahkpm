@@ -94,10 +94,11 @@ func TestForEach(t *testing.T) {
 		},
 	}
 
-	n.ForEach(func(node TreeNode[string]) error {
+	err := n.ForEach(func(node TreeNode[string]) error {
 		calledWith = append(calledWith, node.Value)
 		return nil
 	})
 
+	assert.Nil(t, err)
 	assert.Equal(t, []string{"foo", "bar", "baz"}, calledWith)
 }
