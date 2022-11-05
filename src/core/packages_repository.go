@@ -17,12 +17,23 @@ type PackagesRepository interface {
 	GetPackageDependencies(dep ResolvedDependency) (*DependencySet, error)
 	GetResolvedDependencySHA(dep Dependency) (string, error)
 	ClearCache() error
+	// For testing
+	WithRemoveAll(removeAll func(path string) error) PackagesRepository
 }
 
-type packagesRepository struct{}
+type packagesRepository struct {
+	removeAll func(path string) error
+}
 
 func NewPackagesRepository() PackagesRepository {
-	return &packagesRepository{}
+	return &packagesRepository{
+		removeAll: os.RemoveAll,
+	}
+}
+
+func (pr *packagesRepository) WithRemoveAll(removeAll func(path string) error) PackagesRepository {
+	pr.removeAll = removeAll
+	return pr
 }
 
 func (pr *packagesRepository) CopyPackage(dep ResolvedDependency, path string) error {
@@ -77,7 +88,7 @@ func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, 
 }
 
 func (pr *packagesRepository) ClearCache() error {
-	return os.RemoveAll(pr.getCacheDir())
+	return pr.removeAll(pr.getCacheDir())
 }
 
 func (pr *packagesRepository) getCacheDir() string {
@@ -96,12 +107,12 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 		return errors.New("Error creating package cache directory")
 	}
 
-	packageWasCloned, err := utils.FileExists(packageCacheDir + `\.git`)
+	packageCloneAlreadyExisted, err := utils.FileExists(packageCacheDir + `\.git`)
 	if err != nil {
 		return errors.New("Error checking if package was cloned")
 	}
 
-	if !packageWasCloned {
+	if !packageCloneAlreadyExisted {
 		// Clone the repository into the cache directory
 		_, err := git.PlainClone(packageCacheDir, false, &git.CloneOptions{
 			URL:               getGitUrl(depName),
@@ -125,6 +136,37 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return errors.New("Error getting worktree")
+	}
+
+	if packageCloneAlreadyExisted {
+		errorMessage := "Problem fetching latest updates to package " + depName + ". Continuing from local cache."
+
+		branches, err := repo.Branches()
+		if err != nil {
+			fmt.Println(errorMessage)
+		}
+
+		// Brute forcing our way to updating all branches. Ideally we'd only
+		// do this for the branch we're checking out, but determining whether
+		// we're checking out a branch requires larger scale changes.
+		err = branches.ForEach(func(branch *plumbing.Reference) error {
+			fmt.Println("pulling branch", branch.Name())
+			err = worktree.Checkout(&git.CheckoutOptions{
+				Branch: branch.Name(),
+				Force:  true, // Ignore changes in the working tree
+			})
+			if err != nil {
+				return err
+			}
+			return worktree.Pull(&git.PullOptions{
+				RemoteName:    "origin",
+				ReferenceName: branch.Name(),
+			})
+		})
+
+		if err != nil {
+			fmt.Println(errorMessage)
+		}
 	}
 
 	hash, err := repo.ResolveRevision(plumbing.Revision(depVersionString))
