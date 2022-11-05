@@ -65,3 +65,39 @@ func TestWithChildren(t *testing.T) {
 
 	assert.Equal(t, parent, n)
 }
+
+func TestWithParent(t *testing.T) {
+	n := TreeNode[string]{
+		Value:    "foo",
+		Children: []TreeNode[string]{},
+	}.WithParent(TreeNode[string]{
+		Value:    "bar",
+		Children: []TreeNode[string]{},
+	})
+
+	assert.Equal(t, "bar", n.Parent.Value)
+}
+
+func TestForEach(t *testing.T) {
+	calledWith := []string{}
+	n := TreeNode[string]{
+		Value: "foo",
+		Children: []TreeNode[string]{
+			{
+				Value:    "bar",
+				Children: []TreeNode[string]{},
+			},
+			{
+				Value:    "baz",
+				Children: []TreeNode[string]{},
+			},
+		},
+	}
+
+	n.ForEach(func(node TreeNode[string]) error {
+		calledWith = append(calledWith, node.Value)
+		return nil
+	})
+
+	assert.Equal(t, []string{"foo", "bar", "baz"}, calledWith)
+}

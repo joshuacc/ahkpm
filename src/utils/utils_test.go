@@ -13,8 +13,3 @@ func TestIsSemver(t *testing.T) {
 	assert.True(t, IsSemVer("1.2.3-beta.1+build.1"))
 	assert.False(t, IsSemVer("foobar"))
 }
-
-func TestGetCacheDir(t *testing.T) {
-	value := GetCacheDir()
-	assert.NotEmpty(t, value)
-}

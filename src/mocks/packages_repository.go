@@ -30,3 +30,8 @@ func (m *MockPackagesRepository) ClearCache() error {
 	args := m.Called()
 	return args.Error(0)
 }
+
+func (m *MockPackagesRepository) WithRemoveAll(removeAll func(path string) error) PackagesRepository {
+	m.On("WithRemoveAll", removeAll).Return(m)
+	return m
+}
