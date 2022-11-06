@@ -10,7 +10,7 @@ type DependencyResolver interface {
 	// more than once, the specified versions are compared. In the case of a conflict,
 	// an error is returned. For the time being, any difference in versions is
 	// considered a conflict.
-	Resolve(deps DependencySet) (resolvedDependencies []TreeNode[ResolvedDependency], err error)
+	Resolve(deps DependencySet) (resolvedDependencies ResolvedDependencyTree, err error)
 
 	// WithPackagesRepository is used for testing
 	WithPackagesRepository(pr PackagesRepository) DependencyResolver
@@ -26,25 +26,17 @@ func NewDependencyResolver() DependencyResolver {
 	}
 }
 
-func (r *resolver) Resolve(deps DependencySet) ([]TreeNode[ResolvedDependency], error) {
+func (r *resolver) Resolve(deps DependencySet) (ResolvedDependencyTree, error) {
 	if deps.Len() == 0 {
-		return []TreeNode[ResolvedDependency]{}, nil
+		return ResolvedDependencyTree{}, nil
 	}
 
 	resolvedDepNodes, err := r.innerResolve(deps)
 	if err != nil {
-		return nil, err
+		return ResolvedDependencyTree{}, err
 	}
 
-	depNodesWithInstallPath := make([]TreeNode[ResolvedDependency], 0)
-	for _, depNode := range resolvedDepNodes {
-		nodeWithPath := depNode.
-			Map(func(n TreeNode[ResolvedDependency]) TreeNode[ResolvedDependency] {
-				n.Value.InstallPath = getRelativeInstallPath(n)
-				return n
-			})
-		depNodesWithInstallPath = append(depNodesWithInstallPath, nodeWithPath)
-	}
+	depNodesWithInstallPath := resolvedDepNodes.EnsureInstallPaths()
 
 	err = checkForConflicts(depNodesWithInstallPath)
 	if err != nil {
@@ -54,12 +46,12 @@ func (r *resolver) Resolve(deps DependencySet) ([]TreeNode[ResolvedDependency], 
 	return depNodesWithInstallPath, nil
 }
 
-func (r *resolver) innerResolve(depSet DependencySet) ([]TreeNode[ResolvedDependency], error) {
+func (r *resolver) innerResolve(depSet DependencySet) (ResolvedDependencyTree, error) {
 	if depSet.Len() == 0 {
-		return []TreeNode[ResolvedDependency]{}, nil
+		return ResolvedDependencyTree{}, nil
 	}
 
-	resolvedDepNodes := make([]TreeNode[ResolvedDependency], depSet.Len())
+	resolvedDepNodes := make(ResolvedDependencyTree, depSet.Len())
 
 	// For each dependency, get its transitive dependencies.
 	for i, dep := range depSet.AsArray() {
@@ -81,11 +73,8 @@ func (r *resolver) innerResolve(depSet DependencySet) ([]TreeNode[ResolvedDepend
 	return resolvedDepNodes, nil
 }
 
-func checkForConflicts(depNodes []TreeNode[ResolvedDependency]) error {
-	allDeps := make([]ResolvedDependency, 0)
-	for _, depNode := range depNodes {
-		allDeps = append(allDeps, depNode.Flatten()...)
-	}
+func checkForConflicts(depNodes ResolvedDependencyTree) error {
+	allDeps := depNodes.Flatten()
 
 	depMap := make(map[string]ResolvedDependency)
 	for _, dep := range allDeps {
@@ -130,15 +119,4 @@ func getResolvedDependency(pr PackagesRepository, depNode TreeNode[Dependency]) 
 	resolvedNode := NewTreeNode(resolved.WithDependencies(*childDependencies))
 
 	return &resolvedNode, nil
-}
-
-func getRelativeInstallPath(n TreeNode[ResolvedDependency]) string {
-	path := n.Value.Name
-	parent := n.Parent
-	for parent != nil {
-		path = parent.Value.Name + "/ahkpm-modules/" + path
-		parent = parent.Parent
-	}
-
-	return "ahkpm-modules/" + path
 }

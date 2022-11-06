@@ -32,14 +32,12 @@ func (i Installer) Install(deps DependencySet) {
 	}
 
 	os.RemoveAll("ahkpm-modules")
-	for _, topDepNode := range resolvedDepTree {
-		err = topDepNode.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
-			resolvedDep := resolvedDepNode.Value
-			return pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
-		})
-		if err != nil {
-			utils.Exit(err.Error())
-		}
+	err = resolvedDepTree.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
+		resolvedDep := resolvedDepNode.Value
+		return pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
+	})
+	if err != nil {
+		utils.Exit(err.Error())
 	}
 
 	NewLockManifest().
@@ -47,3 +45,37 @@ func (i Installer) Install(deps DependencySet) {
 		WithResolved(resolvedDepTree).
 		SaveToCwd()
 }
+
+// func (i Installer) Update(packageNames ...string) error {
+// 	depsToUpdate := NewDependencySet()
+// 	currentDeps := ManifestFromCwd().Dependencies.AsMap()
+// 	for _, packageName := range packageNames {
+// 		dep, ok := currentDeps[packageName]
+// 		if !ok {
+// 			return fmt.Errorf("Cannot update %s. It is not present in ahkpm.json", packageName)
+// 		}
+// 		depsToUpdate.AddDependency(dep)
+// 	}
+// 	if depsToUpdate.Len() != len(packageNames) {
+// 		return errors.New("Cannot update multiple versions of the same package")
+// 	}
+
+// 	resolver := NewDependencyResolver()
+// 	resolvedDepTree, err := resolver.Resolve(depsToUpdate)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// Get tree from lockfile
+// 	lm, err := LockManifestFromCwd()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	oldResolved := lm.Resolved
+
+// 	// Replace subtrees with new resolved deps
+// 	// Check for conflicts
+// 	// Empty ahkpm-modules
+// 	// Copy new resolved deps to ahkpm-modules
+// 	// Save lockfile
+// }
