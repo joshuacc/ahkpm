@@ -14,7 +14,7 @@ func TestResolveWithNoDependencies(t *testing.T) {
 	resolvedList, err := dr.Resolve(NewDependencySet())
 
 	assert.NoError(t, err)
-	assert.Equal(t, []TreeNode[ResolvedDependency]{}, resolvedList)
+	assert.Equal(t, ResolvedDependencyTree{}, resolvedList)
 }
 
 func TestResolveWithNoChildDependencies(t *testing.T) {
@@ -35,7 +35,7 @@ func TestResolveWithNoChildDependencies(t *testing.T) {
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []TreeNode[ResolvedDependency]{
+	expectedList := ResolvedDependencyTree{
 		NewTreeNode(fullyResolvedDep),
 	}
 
@@ -75,10 +75,10 @@ func TestResolveWithChildDependencies(t *testing.T) {
 
 	resolvedList, err := dr.Resolve(deps)
 
-	expectedList := []TreeNode[ResolvedDependency]{
+	expectedList := ResolvedDependencyTree{
 		NewTreeNode(fullyResolvedDep.WithDependencies(childDeps)).
 			WithChildren(
-				[]TreeNode[ResolvedDependency]{NewTreeNode(fullyResolvedChildDep)},
+				ResolvedDependencyTree{NewTreeNode(fullyResolvedChildDep)},
 			),
 	}
 	assert.NoError(t, err)
