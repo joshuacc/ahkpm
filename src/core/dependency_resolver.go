@@ -38,7 +38,7 @@ func (r *resolver) Resolve(deps DependencySet) (ResolvedDependencyTree, error) {
 
 	depNodesWithInstallPath := resolvedDepNodes.EnsureInstallPaths()
 
-	err = checkForConflicts(depNodesWithInstallPath)
+	err = depNodesWithInstallPath.CheckForConflicts()
 	if err != nil {
 		return nil, err
 	}

@@ -150,7 +150,6 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 		// do this for the branch we're checking out, but determining whether
 		// we're checking out a branch requires larger scale changes.
 		err = branches.ForEach(func(branch *plumbing.Reference) error {
-			fmt.Println("pulling branch", branch.Name())
 			err = worktree.Checkout(&git.CheckoutOptions{
 				Branch: branch.Name(),
 				Force:  true, // Ignore changes in the working tree
@@ -164,7 +163,7 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 			})
 		})
 
-		if err != nil {
+		if err != nil && err != git.NoErrAlreadyUpToDate {
 			fmt.Println(errorMessage)
 		}
 	}

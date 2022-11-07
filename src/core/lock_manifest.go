@@ -20,19 +20,8 @@ func NewLockManifest() LockManifest {
 	}
 }
 
-func (lm LockManifest) WithResolved(resDeps []TreeNode[ResolvedDependency]) LockManifest {
-	resolved := make([]ResolvedDependency, 0)
-	for _, depNode := range resDeps {
-		err := depNode.ForEach(func(depNode TreeNode[ResolvedDependency]) error {
-			resolved = append(resolved, depNode.Value)
-			return nil
-		})
-		if err != nil {
-			utils.Exit(err.Error())
-		}
-	}
-
-	lm.Resolved = resolved
+func (lm LockManifest) WithResolved(resDeps ResolvedDependencyTree) LockManifest {
+	lm.Resolved = resDeps.Flatten()
 
 	return lm
 }

@@ -70,6 +70,19 @@ func (n TreeNode[T]) WithChildren(children []TreeNode[T]) TreeNode[T] {
 	return n
 }
 
+func (n TreeNode[T]) WithChild(child TreeNode[T]) TreeNode[T] {
+	child.Parent = &n
+
+	n.Children = append(n.Children, child)
+
+	return n
+}
+
+func (n *TreeNode[T]) AddChild(child *TreeNode[T]) {
+	child.Parent = n
+	n.Children = append(n.Children, *child)
+}
+
 func (n TreeNode[T]) WithParent(parent TreeNode[T]) TreeNode[T] {
 	n.Parent = &parent
 	return n
