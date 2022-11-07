@@ -57,6 +57,8 @@ func getRelativeInstallPath(n TreeNode[ResolvedDependency]) string {
 // ResolvedDependencyTreeFromArray takes an array of resolved dependencies (in the format used by LockManifest)
 // and converts it into a tree of resolved dependencies
 func ResolvedDependencyTreeFromArray(arr []ResolvedDependency) ResolvedDependencyTree {
+	// Algorithmically this function is a bit of a mess, but it works and is fast enough
+
 	type intermediateResult struct {
 		dep           ResolvedDependency
 		dependerNames []string
