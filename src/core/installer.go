@@ -2,6 +2,7 @@ package core
 
 import (
 	"ahkpm/src/utils"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -46,36 +47,65 @@ func (i Installer) Install(deps DependencySet) {
 		SaveToCwd()
 }
 
-// func (i Installer) Update(packageNames ...string) error {
-// 	depsToUpdate := NewDependencySet()
-// 	currentDeps := ManifestFromCwd().Dependencies.AsMap()
-// 	for _, packageName := range packageNames {
-// 		dep, ok := currentDeps[packageName]
-// 		if !ok {
-// 			return fmt.Errorf("Cannot update %s. It is not present in ahkpm.json", packageName)
-// 		}
-// 		depsToUpdate.AddDependency(dep)
-// 	}
-// 	if depsToUpdate.Len() != len(packageNames) {
-// 		return errors.New("Cannot update multiple versions of the same package")
-// 	}
+func (i Installer) Update(packageNames ...string) error {
+	depsToUpdate := NewDependencySet()
+	currentDeps := ManifestFromCwd().Dependencies.AsMap()
+	for _, packageName := range packageNames {
+		dep, ok := currentDeps[packageName]
+		if !ok {
+			return fmt.Errorf("Cannot update %s. It is not present in ahkpm.json", packageName)
+		}
+		depsToUpdate.AddDependency(dep)
+	}
+	if depsToUpdate.Len() != len(packageNames) {
+		return errors.New("Cannot update multiple versions of the same package")
+	}
 
-// 	resolver := NewDependencyResolver()
-// 	resolvedDepTree, err := resolver.Resolve(depsToUpdate)
-// 	if err != nil {
-// 		return err
-// 	}
+	resolver := NewDependencyResolver()
+	newResolvedDepTree, err := resolver.Resolve(depsToUpdate)
+	if err != nil {
+		return err
+	}
 
-// 	// Get tree from lockfile
-// 	lm, err := LockManifestFromCwd()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	oldResolved := lm.Resolved
+	// Get tree from lockfile
+	lm, err := LockManifestFromCwd()
+	if err != nil {
+		return err
+	}
+	oldResolved := ResolvedDependencyTreeFromArray(lm.Resolved)
 
-// 	// Replace subtrees with new resolved deps
-// 	// Check for conflicts
-// 	// Empty ahkpm-modules
-// 	// Copy new resolved deps to ahkpm-modules
-// 	// Save lockfile
-// }
+	// Replace subtrees with new resolved deps
+	for _, resolvedDepNode := range newResolvedDepTree {
+		for i, oldResolvedDepNode := range oldResolved {
+			if resolvedDepNode.Value.Name == oldResolvedDepNode.Value.Name {
+				oldResolved[i] = resolvedDepNode
+			}
+		}
+	}
+
+	err = oldResolved.CheckForConflicts()
+	if err != nil {
+		return err
+	}
+
+	// Empty ahkpm-modules
+	os.RemoveAll("ahkpm-modules")
+
+	// Copy new resolved deps to ahkpm-modules
+	pr := NewPackagesRepository()
+	err = oldResolved.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
+		resolvedDep := resolvedDepNode.Value
+		return pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
+	})
+	if err != nil {
+		return err
+	}
+
+	// Save lockfile
+	NewLockManifest().
+		WithDependencies(lm.Dependencies).
+		WithResolved(oldResolved).
+		SaveToCwd()
+
+	return nil
+}

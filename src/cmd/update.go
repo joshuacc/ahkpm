@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	core "ahkpm/src/core"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -15,8 +16,11 @@ var updateCmd = &cobra.Command{
 			return
 		}
 
-		// installer := core.Installer{}
-		// installer.Update(args...)
+		installer := core.Installer{}
+		err := installer.Update(args...)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	},
 }
 

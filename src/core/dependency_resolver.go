@@ -1,9 +1,5 @@
 package core
 
-import (
-	"fmt"
-)
-
 type DependencyResolver interface {
 	// Resolve takes in a list of packages and versions, scans them recursively
 	// and returns a tree of all transitive dependencies. If a package occurs
@@ -38,7 +34,7 @@ func (r *resolver) Resolve(deps DependencySet) (ResolvedDependencyTree, error) {
 
 	depNodesWithInstallPath := resolvedDepNodes.EnsureInstallPaths()
 
-	err = checkForConflicts(depNodesWithInstallPath)
+	err = depNodesWithInstallPath.CheckForConflicts()
 	if err != nil {
 		return nil, err
 	}
@@ -71,27 +67,6 @@ func (r *resolver) innerResolve(depSet DependencySet) (ResolvedDependencyTree, e
 	}
 
 	return resolvedDepNodes, nil
-}
-
-func checkForConflicts(depNodes ResolvedDependencyTree) error {
-	allDeps := depNodes.Flatten()
-
-	depMap := make(map[string]ResolvedDependency)
-	for _, dep := range allDeps {
-		// If the dependency is already in the map, check if the versions are the same.
-		if existingDep, ok := depMap[dep.Name]; ok {
-			if existingDep.Version != dep.Version {
-				return fmt.Errorf("Conflicting versions for dependency %s: %s and %s", dep.Name, existingDep.Version, dep.Version)
-			}
-			if existingDep.SHA != dep.SHA {
-				return fmt.Errorf("Conflicting SHAs for dependency %s: %s and %s", dep.Name, existingDep.SHA, dep.SHA)
-			}
-		} else {
-			depMap[dep.Name] = dep
-		}
-	}
-
-	return nil
 }
 
 func (r *resolver) WithPackagesRepository(pr PackagesRepository) DependencyResolver {

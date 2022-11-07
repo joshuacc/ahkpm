@@ -121,3 +121,88 @@ func TestResolvedDependencyTreeMap(t *testing.T) {
 
 	assert.Equal(t, expected, actual)
 }
+
+func TestResolvedDependencyTreeFromArray(t *testing.T) {
+	arr := []ResolvedDependency{
+		{
+			Name:        "github.com/a/a",
+			InstallPath: "ahkpm-modules/github.com/a/a",
+		},
+		{
+			Name:        "github.com/b/b",
+			InstallPath: "ahkpm-modules/github.com/b/b",
+		},
+		{
+			Name:        "github.com/aa/aa",
+			InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/aa/aa",
+		},
+		{
+			Name:        "github.com/ba/ba",
+			InstallPath: "ahkpm-modules/github.com/b/b/ahkpm-modules/github.com/ba/ba",
+		},
+		{
+			Name:        "github.com/ab/ab",
+			InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/ab/ab",
+		},
+		{
+			Name:        "github.com/aba/aba",
+			InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/ab/ab/ahkpm-modules/github.com/aba/aba",
+		},
+	}
+
+	tree := ResolvedDependencyTreeFromArray(arr)
+
+	assert.Equal(t, "github.com/a/a", tree[0].Value.Name)
+	assert.Equal(t, "github.com/aa/aa", tree[0].Children[0].Value.Name)
+	assert.Equal(t, "github.com/ab/ab", tree[0].Children[1].Value.Name)
+	assert.Equal(t, "github.com/aba/aba", tree[0].Children[1].Children[0].Value.Name)
+	assert.Equal(t, "github.com/b/b", tree[1].Value.Name)
+	assert.Equal(t, "github.com/ba/ba", tree[1].Children[0].Value.Name)
+}
+
+func TestFindByNamesPath(t *testing.T) {
+	tree := []TreeNode[ResolvedDependency]{
+		{
+			Value: ResolvedDependency{
+				Name:        "github.com/a/a",
+				InstallPath: "ahkpm-modules/github.com/a/a",
+			},
+			Children: []TreeNode[ResolvedDependency]{
+				{
+					Value: ResolvedDependency{
+						Name:        "github.com/aa/aa",
+						InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/aa/aa",
+					},
+				},
+				{
+					Value: ResolvedDependency{
+						Name:        "github.com/ab/ab",
+						InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/ab/ab",
+					},
+					Children: []TreeNode[ResolvedDependency]{
+						{
+							Value: ResolvedDependency{
+								Name:        "github.com/aba/aba",
+								InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/ab/ab/ahkpm-modules/github.com/aba/aba",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Value: ResolvedDependency{
+				Name:        "github.com/b/b",
+				InstallPath: "ahkpm-modules/github.com/b/b",
+			},
+		},
+	}
+
+	expected := NewTreeNode(ResolvedDependency{
+		Name:        "github.com/aba/aba",
+		InstallPath: "ahkpm-modules/github.com/a/a/ahkpm-modules/github.com/ab/ab/ahkpm-modules/github.com/aba/aba",
+	})
+
+	actual := FindByNamesPath(&tree, []string{"github.com/a/a", "github.com/ab/ab", "github.com/aba/aba"})
+	assert.Equal(t, expected.Value.Name, actual.Value.Name)
+}
