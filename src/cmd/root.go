@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"ahkpm/src/constants"
+	utils "ahkpm/src/utils"
 	"fmt"
 	"os"
 
@@ -13,6 +15,24 @@ var rootCmd = &cobra.Command{
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	},
+	Run: func(cmd *cobra.Command, args []string) {
+		if cmd.Flag("version").Value.String() == "true" {
+			fmt.Println("     ahkpm: " + constants.SelfVersion)
+			version, err := utils.GetAutoHotkeyVersion()
+			if err == nil {
+				fmt.Println("AutoHotkey: " + version)
+			}
+			return
+		}
+		err := cmd.Help()
+		if err != nil {
+			utils.Exit(err.Error())
+		}
+	},
+}
+
+func init() {
+	rootCmd.PersistentFlags().BoolP("version", "v", false, "Display the version of ahkpm and AutoHotkey")
 }
 
 func Execute() {

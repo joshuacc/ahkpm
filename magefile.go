@@ -72,7 +72,7 @@ func Msi(version string) error {
 }
 
 func VerifyVersion(version string) error {
-	out, err := sh.Output("bin/ahkpm.exe", "version")
+	out, err := sh.Output("bin/ahkpm.exe", "--version")
 	if err != nil {
 		return err
 	}
