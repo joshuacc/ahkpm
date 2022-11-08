@@ -1,8 +1,8 @@
-# ahkpm - The AutoHotKey Package Manager.
+# ahkpm - The AutoHotkey Package Manager.
 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/joshuacc/ahkpm?color=blue&sort=semver)](https://github.com/joshuacc/ahkpm/releases) [![build](https://github.com/joshuacc/ahkpm/workflows/mage/badge.svg?branch=main)](https://github.com/joshuacc/ahkpm/actions/workflows/build.yml?query=branch%3Amain) [![Maintainability](https://api.codeclimate.com/v1/badges/d879856f8da1f8b803a6/maintainability)](https://codeclimate.com/github/joshuacc/ahkpm/maintainability) [![codecov](https://codecov.io/gh/joshuacc/ahkpm/branch/main/graph/badge.svg?token=CHRB93N4U7)](https://codecov.io/gh/joshuacc/ahkpm)
 
-[AutoHotKey][ahk] is a powerful tool for scripting automations on Windows,
+[AutoHotkey][ahk] is a powerful tool for scripting automations on Windows,
 but managing dependencies for your scripts is painful.
 `ahkpm` intends to bring modern package management to AutoHotkey,
 making it easier than ever to automate away the drudgery.
@@ -15,14 +15,16 @@ Usage:
 
 Available Commands:
   cache clean  Clears the package cache
-  completion   Generate the autocompletion script for the specified shell
   help         Help about any command
   init         Interactively create an ahkpm.json file in the current directory
   install      Installs either the specified package or all packages listed in ahkpm.json
+  update       Update package(s) to the latest version allowed by ahkpm.json
   version      Get the version of ahkpm
 
 Flags:
   -h, --help   help for ahkpm
+
+Use "ahkpm [command] --help" for more information about a command.
 ```
 
 ## Installation
@@ -35,7 +37,7 @@ To install ahkpm:
 
 ## Basic usage
 
-1. Open the command line and navigate to the directory which will contain your AutoHotKey script.
+1. Open the command line and navigate to the directory which will contain your AutoHotkey script.
 2. Run `ahkpm init` and answer the prompts to create an `ahkpm.json` file
 3. Run `ahkpm install <package>@<version>`
    - The package can be any github repository in the form: `github.com/user/repo`
@@ -47,7 +49,7 @@ To install ahkpm:
      - Omitting the version is not yet supported
 4. Add `#Include, %A_ScriptDir%` to the top of your script to set the current directory as the context for subsequent includes
 5. Add `#Include, ahkpm-modules\github.com\user\repo\main-file.ahk` to your script
-6. You can now use the package's functionality within your AutoHotKey script!
+6. You can now use the package's functionality within your AutoHotkey script!
 
 ## Current limitations
 
