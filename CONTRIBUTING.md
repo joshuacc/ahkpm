@@ -16,7 +16,7 @@ We don't want to waste anyone's time or effort.
 To contribute to ahkpm's codebase, you will need the following:
 
 - A computer running Microsoft Windows
-- [AutoHotKey](https://www.autohotkey.com/) installed (Optional, but recommended)
+- [AutoHotkey](https://www.autohotkey.com/) installed (Optional, but recommended)
 - [Go 1.19 or later](https://go.dev/) installed.
 - [Mage](https://magefile.org/) installed
 - [golangci-lint](https://golangci-lint.run/) installed (Optional, but recommended for in-editor feedback)

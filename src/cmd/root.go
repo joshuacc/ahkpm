@@ -9,7 +9,10 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "ahkpm",
-	Short: "The package manager for AutoHotKey",
+	Short: "The package manager for AutoHotkey",
+	CompletionOptions: cobra.CompletionOptions{
+		DisableDefaultCmd: true,
+	},
 }
 
 func Execute() {
