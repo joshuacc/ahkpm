@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
-Nothing yet
-
+- Added `ahkpm update` to update package(s) to latest allowed version
+- Fixed a bug where the local package cache was taking precedence over the remote
+- `ahkpm version` now also attempts to display the version of AutoHotkey installed
+- Set up a new documentation site at [ahkpm.dev][https://ahkpm.dev].
 ## 0.3.0
 
 - Resolve transitive dependencies
