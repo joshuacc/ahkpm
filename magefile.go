@@ -77,7 +77,7 @@ func VerifyVersion(version string) error {
 		return err
 	}
 
-	if !strings.Contains(out, "ahkpm version: "+version) {
+	if !strings.Contains(out, version) {
 		return errors.New("Version mismatch.\n    Expected: " + version + "\n    Actual: " + out)
 	}
 
