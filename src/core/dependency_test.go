@@ -71,3 +71,8 @@ func TestEquals(t *testing.T) {
 		assert.Equal(t, c.isEqual, c.dep1.Equals(c.dep2))
 	}
 }
+
+func TestCanonicalizeDependencyName(t *testing.T) {
+	assert.Equal(t, "github.com/a/a", CanonicalizeDependencyName("gh:a/a"))
+	assert.Equal(t, "github.com/a/a", CanonicalizeDependencyName("github.com/a/a"))
+}

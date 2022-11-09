@@ -30,10 +30,13 @@ func NewDependency(name string, version Version) Dependency {
 // DependencyFromSpecifiers creates a new dependency from the given name and
 // version specifier. It performs validation on both.
 func DependencyFromSpecifiers(name string, versionSpecifier string) (Dependency, error) {
+	name = CanonicalizeDependencyName(name)
+
 	isValidName := isValidDependencyName(name)
 	if !isValidName {
 		return nil, errors.New("Invalid dependency name " + name)
 	}
+
 	version, err := VersionFromSpecifier(versionSpecifier)
 	if err != nil {
 		return nil, err
@@ -70,10 +73,18 @@ func (d dependency) Equals(other Dependency) bool {
 }
 
 func isValidDependencyName(name string) bool {
-	isMatch, err := regexp.MatchString("^github\\.com\\/[\\w-\\.]+\\/[\\w-\\.]+$", name)
+	isMatch, err := regexp.MatchString(`^github\.com\/[\w-\.]+\/[\w-\.]+$`, name)
 	if err != nil {
 		panic(err)
 	}
 
 	return isMatch
+}
+
+func CanonicalizeDependencyName(name string) string {
+	if strings.HasPrefix(name, "gh:") {
+		name = strings.Replace(name, "gh:", "github.com/", 1)
+	}
+
+	return name
 }
