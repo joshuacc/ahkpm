@@ -51,6 +51,8 @@ func (i Installer) Update(packageNames ...string) error {
 	depsToUpdate := NewDependencySet()
 	currentDeps := ManifestFromCwd().Dependencies.AsMap()
 	for _, packageName := range packageNames {
+		packageName = CanonicalizeDependencyName(packageName)
+
 		dep, ok := currentDeps[packageName]
 		if !ok {
 			return fmt.Errorf("Cannot update %s. It is not present in ahkpm.json", packageName)
