@@ -19,7 +19,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	RootCmd.AddCommand(listCmd)
 }
 
 func GetDependenciesForDisplay(set core.DependencySet) string {

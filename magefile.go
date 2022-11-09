@@ -4,12 +4,14 @@
 package main
 
 import (
+	"ahkpm/src/cmd"
 	"errors"
 	"os"
 	"strings"
 
 	"github.com/magefile/mage/sh"
 	"github.com/princjef/mageutil/bintool"
+	"github.com/spf13/cobra/doc"
 )
 
 var linter = bintool.Must(bintool.New(
@@ -97,4 +99,8 @@ func BuildRelease(version string) error {
 		return err
 	}
 	return nil
+}
+
+func MarkdownDocs(dir string) error {
+	return doc.GenMarkdownTree(cmd.RootCmd, dir)
 }

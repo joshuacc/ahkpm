@@ -10,5 +10,5 @@ var cacheCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(cacheCmd)
+	RootCmd.AddCommand(cacheCmd)
 }

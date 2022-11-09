@@ -181,7 +181,7 @@ create an ahkpm.json file in the current directory.`,
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(initCmd)
 }
 
 func showPrompt(promptMessage string, validate Validator, options ...prompt.Option) string {
