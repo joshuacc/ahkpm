@@ -11,8 +11,18 @@ import (
 )
 
 var installCmd = &cobra.Command{
-	Use:   "install",
-	Short: "Installs either the specified package or all packages listed in ahkpm.json",
+	Use:   "install [<packageName>@<version>]",
+	Short: "Installs specified package. If none is specified, reinstalls all packages listed in ahkpm.json",
+	Long: `Installs specified package. If none specified, reinstalls all packages listed in ahkpm.json.
+	
+For example, "ahkpm install github.com/user/repo@1.0.0" will download version
+1.0.0 of the package into the "ahkpm-modules" folder as well as save the package
+name and version to ahkpm.json for future use.
+
+You may also use package name shorthands, such as "gh:user/repo".
+
+Running "ahkpm install" without specifying a package name will download all
+dependencies specified in ahkpm.json into the "ahkpm-modules" folder.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cwd, err := os.Getwd()
 		if err != nil {

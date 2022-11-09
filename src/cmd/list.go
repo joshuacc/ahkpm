@@ -10,7 +10,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List all installed packages and their versions",
-	Long:    `List all installed packages and their versions`,
+	Long:    `Displays a table listing all installed packages and their versions`,
 	Example: `ahkpm list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		deps := core.ManifestFromCwd().Dependencies

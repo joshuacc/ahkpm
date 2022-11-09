@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "Display the version of ahkpm and AutoHotkey")
+	rootCmd.Flags().BoolP("version", "v", false, "Display the version of ahkpm and AutoHotkey")
 }
 
 func Execute() {
