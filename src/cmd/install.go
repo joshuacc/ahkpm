@@ -38,21 +38,18 @@ var installCmd = &cobra.Command{
 			return
 		}
 
-		deps := make([]core.Dependency, len(args))
-		for i, arg := range args {
+		manifest := core.ManifestFromCwd()
+		for _, arg := range args {
 			dep, err := core.DependencyFromSpecifier(arg)
 			if err != nil {
 				utils.Exit(err.Error())
 			}
-			deps[i] = dep
-		}
 
-		manifest := core.ManifestFromCwd()
-		for _, dep := range deps {
 			fmt.Println(
 				"Installing package", dep.Name(),
 				"with", strings.ToLower(string(dep.Version().Kind())), dep.Version().Value(),
 			)
+
 			manifest.Dependencies.AddDependency(dep)
 		}
 
