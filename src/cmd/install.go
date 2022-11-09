@@ -15,16 +15,11 @@ import (
 var installLong string
 
 var installCmd = &cobra.Command{
-	Use:   "install [<packageName>@<version>]",
-	Short: "Installs specified package. If none, reinstalls all packages in ahkpm.json.",
+	Use:   "install [<packageName>@<version>]...",
+	Short: "Installs specified package(s). If none, reinstalls all packages in ahkpm.json.",
 	Long:  installLong,
 	Run: func(cmd *cobra.Command, args []string) {
-		cwd, err := os.Getwd()
-		if err != nil {
-			utils.Exit("Error getting current directory")
-		}
-
-		ahkpmFileExists, err := utils.FileExists(cwd + `\ahkpm.json`)
+		ahkpmFileExists, err := utils.FileExists(`ahkpm.json`)
 		if err != nil {
 			utils.Exit("Error checking if ahkpm.json exists")
 		}
@@ -43,23 +38,24 @@ var installCmd = &cobra.Command{
 			return
 		}
 
-		if len(args) > 1 {
-			// TODO: support specifying multiple packages
-			fmt.Println("Please specify only one package to install")
-			return
+		deps := make([]core.Dependency, len(args))
+		for i, arg := range args {
+			dep, err := core.DependencyFromSpecifier(arg)
+			if err != nil {
+				utils.Exit(err.Error())
+			}
+			deps[i] = dep
 		}
 
-		newDep, err := core.DependencyFromSpecifier(args[0])
-		if err != nil {
-			utils.Exit(err.Error())
-		}
-
-		fmt.Println(
-			"Installing package", newDep.Name(),
-			"with", strings.ToLower(string(newDep.Version().Kind())), newDep.Version().Value(),
-		)
 		manifest := core.ManifestFromCwd()
-		manifest.Dependencies.AddDependency(newDep)
+		for _, dep := range deps {
+			fmt.Println(
+				"Installing package", dep.Name(),
+				"with", strings.ToLower(string(dep.Version().Kind())), dep.Version().Value(),
+			)
+			manifest.Dependencies.AddDependency(dep)
+		}
+
 		installer.Install(manifest.Dependencies)
 		manifest.SaveToCwd()
 	},
