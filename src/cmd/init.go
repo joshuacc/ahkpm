@@ -22,6 +22,10 @@ import (
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Interactively create an ahkpm.json file in the current directory",
+	Long: `Interactively create an ahkpm.json file in the current directory.
+
+Running "ahkpm init" will prompt you for information about your package and
+create an ahkpm.json file in the current directory.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		manifestExists, err := utils.FileExists("ahkpm.json")
 		if err != nil {
@@ -177,7 +181,7 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(initCmd)
 }
 
 func showPrompt(promptMessage string, validate Validator, options ...prompt.Option) string {

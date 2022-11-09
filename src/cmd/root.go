@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "ahkpm",
 	Short: "The package manager for AutoHotkey",
 	CompletionOptions: cobra.CompletionOptions{
@@ -28,11 +28,11 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "Display the version of ahkpm and AutoHotkey")
+	RootCmd.Flags().BoolP("version", "v", false, "Display the version of ahkpm and AutoHotkey")
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

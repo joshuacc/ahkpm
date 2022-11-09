@@ -3,6 +3,7 @@ package cmd
 import (
 	"ahkpm/src/core"
 	"ahkpm/src/utils"
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -10,9 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//go:embed install-long.md
+var installLong string
+
 var installCmd = &cobra.Command{
-	Use:   "install",
-	Short: "Installs either the specified package or all packages listed in ahkpm.json",
+	Use:   "install [<packageName>@<version>]",
+	Short: "Installs specified package. If none, reinstalls all packages in ahkpm.json.",
+	Long:  installLong,
 	Run: func(cmd *cobra.Command, args []string) {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -61,5 +66,5 @@ var installCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(installCmd)
+	RootCmd.AddCommand(installCmd)
 }
