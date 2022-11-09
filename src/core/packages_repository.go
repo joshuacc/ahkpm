@@ -193,7 +193,8 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 
 	for _, sub := range submodules {
 		err := sub.Update(&git.SubmoduleUpdateOptions{})
-		if err != nil {
+		// In the event of a connection issue we continue from the local copy
+		if err != nil && !strings.Contains(err.Error(), "no such host") {
 			return errors.New("Error updating submodule")
 		}
 	}
