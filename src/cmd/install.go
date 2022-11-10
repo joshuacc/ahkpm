@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"ahkpm/src/core"
+	"ahkpm/src/invariant"
 	"ahkpm/src/utils"
 	_ "embed"
 	"fmt"
@@ -20,9 +21,7 @@ var installCmd = &cobra.Command{
 	Long:  installLong,
 	Run: func(cmd *cobra.Command, args []string) {
 		ahkpmFileExists, err := utils.FileExists(`ahkpm.json`)
-		if err != nil {
-			utils.Exit("Error checking if ahkpm.json exists")
-		}
+		invariant.AssertNoError(err)
 
 		if !ahkpmFileExists {
 			fmt.Println("ahkpm.json not found in current directory. Run `ahkpm init` to create one.")
@@ -31,30 +30,19 @@ var installCmd = &cobra.Command{
 
 		installer := core.Installer{}
 
-		if len(args) == 0 {
-			fmt.Println("Installing all dependencies")
-			dependencies := core.ManifestFromCwd().Dependencies
-			installer.Install(dependencies)
-			return
+		newDeps, err := core.NewDependencySet().AddDependenciesFromSpecifiers(args)
+		if err != nil {
+			utils.Exit(err.Error())
 		}
 
-		manifest := core.ManifestFromCwd()
-		for _, arg := range args {
-			dep, err := core.DependencyFromSpecifier(arg)
-			if err != nil {
-				utils.Exit(err.Error())
-			}
-
+		for _, dep := range newDeps.AsArray() {
 			fmt.Println(
 				"Installing package", dep.Name(),
 				"with", strings.ToLower(string(dep.Version().Kind())), dep.Version().Value(),
 			)
-
-			manifest.Dependencies.AddDependency(dep)
 		}
 
-		installer.Install(manifest.Dependencies)
-		manifest.SaveToCwd()
+		installer.Install(newDeps)
 	},
 }
 

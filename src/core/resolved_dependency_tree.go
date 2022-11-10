@@ -43,6 +43,29 @@ func (r ResolvedDependencyTree) EnsureInstallPaths() ResolvedDependencyTree {
 	})
 }
 
+// Merge merges two resolved dependency trees from right to left, by replacing
+// the left tree's root nodes with the right tree's root nodes if they have the
+// same name. Any root nodes in the right tree that do not exist in the left
+// tree are appended to the left tree.
+func (r ResolvedDependencyTree) Merge(other ResolvedDependencyTree) ResolvedDependencyTree {
+	// convert to map for easier lookup
+	rMapToIndex := make(map[string]int, len(r))
+	for i, depNode := range r {
+		rMapToIndex[depNode.Value.Name] = i
+	}
+
+	// merge
+	for _, depNode := range other {
+		if index, ok := rMapToIndex[depNode.Value.Name]; ok {
+			r[index] = depNode
+		} else {
+			r = append(r, depNode)
+		}
+	}
+
+	return r
+}
+
 func getRelativeInstallPath(n TreeNode[ResolvedDependency]) string {
 	path := n.Value.Name
 	parent := n.Parent

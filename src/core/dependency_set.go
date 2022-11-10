@@ -88,3 +88,22 @@ func (ds DependencySet) AddDependency(newDep Dependency) DependencySet {
 	ds._set[newDep.Name()] = newDep
 	return ds
 }
+
+// AddDependencies adds multiple dependencies to the array, replacing any existing
+func (ds DependencySet) AddDependencies(newDeps []Dependency) DependencySet {
+	for _, dep := range newDeps {
+		ds._set[dep.Name()] = dep
+	}
+	return ds
+}
+
+func (ds DependencySet) AddDependenciesFromSpecifiers(depSpec []string) (DependencySet, error) {
+	for _, dep := range depSpec {
+		dep, err := DependencyFromSpecifier(dep)
+		if err != nil {
+			return ds, err
+		}
+		ds.AddDependency(dep)
+	}
+	return ds, nil
+}

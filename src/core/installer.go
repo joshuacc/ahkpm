@@ -9,11 +9,11 @@ import (
 
 type Installer struct{}
 
-func (i Installer) Install(deps DependencySet) {
+func (i Installer) Install(newDeps DependencySet) {
 	pr := NewPackagesRepository()
 
 	lm, err := LockManifestFromCwd()
-	if err == nil && deps.Equals(lm.Dependencies) {
+	if err == nil && newDeps.Len() == 0 {
 		fmt.Println("No dependency changes found. Installing from lockfile.")
 		os.RemoveAll("ahkpm-modules")
 		for _, resolvedDep := range lm.Resolved {
@@ -25,6 +25,18 @@ func (i Installer) Install(deps DependencySet) {
 
 		return
 	}
+	hasLockfile := err == nil
+
+	manifest := ManifestFromCwd()
+
+	// If there is no lockfile, we need to resolve all dependencies, not just
+	// the new ones.
+	deps := newDeps
+	if !hasLockfile {
+		for _, dep := range manifest.Dependencies.AsArray() {
+			deps.AddDependency(dep)
+		}
+	}
 
 	resolver := NewDependencyResolver()
 	resolvedDepTree, err := resolver.Resolve(deps)
@@ -32,8 +44,21 @@ func (i Installer) Install(deps DependencySet) {
 		utils.Exit(err.Error())
 	}
 
+	var combinedDepTree ResolvedDependencyTree
+	if hasLockfile {
+		oldDepTree := ResolvedDependencyTreeFromArray(lm.Resolved)
+		combinedDepTree = oldDepTree.Merge(resolvedDepTree)
+	} else {
+		combinedDepTree = resolvedDepTree
+	}
+
+	err = combinedDepTree.CheckForConflicts()
+	if err != nil {
+		utils.Exit(err.Error())
+	}
+
 	os.RemoveAll("ahkpm-modules")
-	err = resolvedDepTree.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
+	err = combinedDepTree.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
 		resolvedDep := resolvedDepNode.Value
 		return pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
 	})
@@ -41,9 +66,12 @@ func (i Installer) Install(deps DependencySet) {
 		utils.Exit(err.Error())
 	}
 
+	manifest.Dependencies.AddDependencies(newDeps.AsArray())
+	manifest.SaveToCwd()
+
 	NewLockManifest().
-		WithDependencies(deps).
-		WithResolved(resolvedDepTree).
+		WithDependencies(manifest.Dependencies).
+		WithResolved(combinedDepTree).
 		SaveToCwd()
 }
 
