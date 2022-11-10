@@ -104,37 +104,26 @@ func (pr *packagesRepository) getVersionMatchingSemVerRange(dep Dependency) (Dep
 		return dep, err
 	}
 
-	// Get the latest tag that matches the semver range
-	constraint, err := semver.NewConstraint(dep.Version().Value())
-	if err != nil {
-		return nil, err
-	}
-	matchingTags := make([]*semver.Version, 0)
 	tagIter, err := repo.Tags()
 	if err != nil {
 		return nil, err
 	}
+	tags := make([]string, 0)
 	err = tagIter.ForEach(func(ref *plumbing.Reference) error {
 		tagName := strings.TrimPrefix(ref.Name().String(), "refs/tags/")
-		tagVersion, err := semver.NewVersion(tagName)
-		if err == nil && constraint.Check(tagVersion) {
-			matchingTags = append(matchingTags, tagVersion)
-		}
+		tags = append(tags, tagName)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	sort.Sort(semver.Collection(matchingTags))
-
-	if len(matchingTags) == 0 {
-		return nil, errors.New("No matching tags found for " + dep.Name())
+	latestMatchingVersion, err := GetLatestVersionMatchingRangeFromArray(tags, dep.Version().Value())
+	if err != nil {
+		return nil, err
 	}
 
-	latestMatchingTag := matchingTags[len(matchingTags)-1]
-
-	return NewDependency(dep.Name(), NewVersion(SemVerExact, latestMatchingTag.String())), nil
+	return NewDependency(dep.Name(), NewVersion(SemVerExact, latestMatchingVersion)), nil
 }
 
 func (pr *packagesRepository) ClearCache() error {
@@ -266,4 +255,30 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 
 func getGitUrl(packageName string) string {
 	return "https://" + packageName + ".git"
+}
+
+func GetLatestVersionMatchingRangeFromArray(versions []string, rangeString string) (string, error) {
+	constraint, err := semver.NewConstraint(rangeString)
+	if err != nil {
+		return "", err
+	}
+
+	matchingVersions := make([]*semver.Version, 0)
+
+	for _, version := range versions {
+		version, err := semver.StrictNewVersion(version)
+		if err == nil && constraint.Check(version) {
+			matchingVersions = append(matchingVersions, version)
+		}
+	}
+
+	if len(matchingVersions) == 0 {
+		return "", errors.New("No matching versions found")
+	}
+
+	sort.Sort(semver.Collection(matchingVersions))
+
+	latestMatchingVersion := matchingVersions[len(matchingVersions)-1]
+
+	return latestMatchingVersion.String(), nil
 }
