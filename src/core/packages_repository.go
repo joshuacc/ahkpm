@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/otiai10/copy"
@@ -72,6 +74,15 @@ func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) (*D
 }
 
 func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, error) {
+	if dep.Version().Kind() == SemVerRange {
+		exactDep, err := pr.getVersionMatchingSemVerRange(dep)
+		if err != nil {
+			return "", err
+		}
+
+		dep = exactDep
+	}
+
 	err := pr.ensurePackageIsReady(dep.Name(), dep.Version().Value())
 	if err != nil {
 		return "", err
@@ -87,6 +98,45 @@ func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, 
 	return ref.Hash().String(), nil
 }
 
+func (pr *packagesRepository) getVersionMatchingSemVerRange(dep Dependency) (Dependency, error) {
+	repo, _, err := pr.ensurePackageIsUpToDate(dep.Name())
+	if err != nil {
+		return dep, err
+	}
+
+	// Get the latest tag that matches the semver range
+	constraint, err := semver.NewConstraint(dep.Version().Value())
+	if err != nil {
+		return nil, err
+	}
+	matchingTags := make([]*semver.Version, 0)
+	tagIter, err := repo.Tags()
+	if err != nil {
+		return nil, err
+	}
+	err = tagIter.ForEach(func(ref *plumbing.Reference) error {
+		tagName := strings.TrimPrefix(ref.Name().String(), "refs/tags/")
+		tagVersion, err := semver.NewVersion(tagName)
+		if err == nil && constraint.Check(tagVersion) {
+			matchingTags = append(matchingTags, tagVersion)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Sort(semver.Collection(matchingTags))
+
+	if len(matchingTags) == 0 {
+		return nil, errors.New("No matching tags found for " + dep.Name())
+	}
+
+	latestMatchingTag := matchingTags[len(matchingTags)-1]
+
+	return NewDependency(dep.Name(), NewVersion(SemVerExact, latestMatchingTag.String())), nil
+}
+
 func (pr *packagesRepository) ClearCache() error {
 	return pr.removeAll(pr.getCacheDir())
 }
@@ -99,17 +149,17 @@ func (pr *packagesRepository) getPackageCacheDir(depName string) string {
 	return pr.getCacheDir() + `\` + depName
 }
 
-func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionString string) error {
+func (pr *packagesRepository) ensurePackageIsUpToDate(depName string) (*git.Repository, bool, error) {
 	packageCacheDir := pr.getPackageCacheDir(depName)
 
 	err := os.MkdirAll(packageCacheDir, os.ModePerm)
 	if err != nil {
-		return errors.New("Error creating package cache directory")
+		return nil, false, errors.New("Error creating package cache directory")
 	}
 
 	packageCloneAlreadyExisted, err := utils.FileExists(packageCacheDir + `\.git`)
 	if err != nil {
-		return errors.New("Error checking if package was cloned")
+		return nil, false, errors.New("Error checking if package was cloned")
 	}
 
 	if !packageCloneAlreadyExisted {
@@ -123,14 +173,27 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 			if err.Error() == "authentication required" {
 				message = "Error downloading package " + depName + ". Are you sure that package exists?"
 			}
-			return errors.New(message)
+			return nil, packageCloneAlreadyExisted, errors.New(message)
 		}
 	}
 
-	// Checkout the specified version
 	repo, err := git.PlainOpen(packageCacheDir)
 	if err != nil {
-		return errors.New("Error opening package")
+		return nil, packageCloneAlreadyExisted, errors.New("Error opening package")
+	}
+
+	err = repo.Fetch(&git.FetchOptions{})
+	if err != nil && err.Error() != "already up-to-date" {
+		return nil, packageCloneAlreadyExisted, errors.New("Error fetching package")
+	}
+
+	return repo, packageCloneAlreadyExisted, nil
+}
+
+func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionString string) error {
+	repo, previouslyCloned, err := pr.ensurePackageIsUpToDate(depName)
+	if err != nil {
+		return err
 	}
 
 	worktree, err := repo.Worktree()
@@ -138,7 +201,7 @@ func (pr *packagesRepository) ensurePackageIsReady(depName string, depVersionStr
 		return errors.New("Error getting worktree")
 	}
 
-	if packageCloneAlreadyExisted {
+	if previouslyCloned {
 		errorMessage := "Problem fetching latest updates to package " + depName + ". Continuing from local cache."
 
 		branches, err := repo.Branches()
