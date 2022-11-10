@@ -6,17 +6,18 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"regexp"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 func IsSemVer(value string) bool {
-	// This regular expression is taken from semver.org
-	isMatch, err := regexp.MatchString("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$", value)
-	if err != nil {
-		Exit("Error validating semver:")
-	}
+	_, err := semver.StrictNewVersion(value)
+	return err == nil
+}
 
-	return isMatch
+func IsSemVerRange(value string) bool {
+	_, err := semver.NewConstraint(value)
+	return err == nil
 }
 
 func Exit(msg string) {

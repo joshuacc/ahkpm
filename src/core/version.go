@@ -1,8 +1,10 @@
 package core
 
 import (
+	"ahkpm/src/invariant"
 	"ahkpm/src/utils"
 	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -21,6 +23,7 @@ type version struct {
 type VersionKind string
 
 const (
+	SemVerRange VersionKind = "Semantic Version Range"
 	SemVerExact VersionKind = "Semantic Version"
 	Branch      VersionKind = "Branch"
 	Tag         VersionKind = "Tag"
@@ -52,11 +55,32 @@ func VersionFromSpecifier(versionSpecifier string) (Version, error) {
 	} else if strings.HasPrefix(versionSpecifier, "commit:") {
 		v.kind = Commit
 		v.value = strings.TrimPrefix(versionSpecifier, "commit:")
+	} else if utils.IsSemVerRange(versionSpecifier) {
+		v.kind = SemVerRange
+		v.value = getLegibleRange(versionSpecifier)
 	} else {
 		return v, errors.New("Invalid version specifier " + versionSpecifier)
 	}
 
 	return v, nil
+}
+
+// Check to see if the range is of form "1" or "1.2" to convert them
+// to equivalents "1.x.x" and "1.2.x" respectively. The goal is to make
+// the range more explicit and readable to the user before saving them.
+func getLegibleRange(versionSpecifier string) string {
+	isSimpleRange, err := regexp.Match(`^\d+\.?(\d+)?$`, []byte(versionSpecifier))
+	invariant.AssertNoError(err)
+	if isSimpleRange {
+		if strings.Contains(versionSpecifier, ".") {
+			// If it's of form "1.2", convert it to "1.2.x"
+			return versionSpecifier + ".x"
+		} else {
+			// If it's of form "1", convert it to "1.x.x"
+			return versionSpecifier + ".x.x"
+		}
+	}
+	return versionSpecifier
 }
 
 // Represents the Version as a valid version specifier string.

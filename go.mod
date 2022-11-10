@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
 	github.com/VividCortex/ewma v1.1.1 // indirect

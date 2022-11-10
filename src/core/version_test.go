@@ -15,11 +15,14 @@ func TestVersionFromString(t *testing.T) {
 		shouldError bool
 	}
 
-	cases := [5]Case{
+	cases := []Case{
 		{"1.2.3", SemVerExact, "1.2.3", false},
 		{"branch:master", Branch, "master", false},
 		{"tag:1.2.3", Tag, "1.2.3", false},
 		{"commit:1234567890", Commit, "1234567890", false},
+		{"1", SemVerRange, "1.x.x", false},
+		{"3.2", SemVerRange, "3.2.x", false},
+		{">= 2.0.0", SemVerRange, ">= 2.0.0", false},
 		{"foobar", SemVerExact, "", true},
 	}
 

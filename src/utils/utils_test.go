@@ -11,5 +11,18 @@ func TestIsSemver(t *testing.T) {
 	assert.True(t, IsSemVer("1.2.3"))
 	assert.True(t, IsSemVer("1.2.3-beta.1"))
 	assert.True(t, IsSemVer("1.2.3-beta.1+build.1"))
+	assert.False(t, IsSemVer("1"))
+	assert.False(t, IsSemVer("^1.2.3"))
 	assert.False(t, IsSemVer("foobar"))
+}
+
+func TestIsSemverRange(t *testing.T) {
+	assert.True(t, IsSemVerRange("1.2.3"))
+	assert.True(t, IsSemVerRange("1.2.3-beta.1"))
+	assert.True(t, IsSemVerRange("1.2.3-beta.1+build.1"))
+	assert.True(t, IsSemVerRange("1.2.3-beta.1+build.1 || 1.2.3-beta.2"))
+	assert.True(t, IsSemVerRange("1.2.3-beta.1+build.1 || 1.2.3-beta.2 || 1.2.3-beta.3"))
+	assert.True(t, IsSemVerRange("^1.2.3"))
+	assert.True(t, IsSemVerRange("~1.2.3"))
+	assert.False(t, IsSemVerRange("foobar"))
 }
