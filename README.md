@@ -4,27 +4,28 @@
 
 [AutoHotkey][ahk] is a powerful tool for scripting automations on Windows,
 but managing dependencies for your scripts is painful.
-`ahkpm` intends to bring modern package management to AutoHotkey,
+`ahkpm` brings modern package management to AutoHotkey,
 making it easier than ever to automate away the drudgery.
 
 ## Commands
 
 ```
 Usage:
+  ahkpm [flags]
   ahkpm [command]
 
 Available Commands:
-  cache clean  Clears the package cache
-  help         Help about any command
-  init         Interactively create an ahkpm.json file in the current directory
-  install      Installs either the specified package or all packages listed in ahkpm.json
-  update       Update package(s) to the latest version allowed by ahkpm.json
-  version      Get the version of ahkpm
+  cache       Manipulates the packages cache
+  help        Help about any command
+  init        Interactively create an ahkpm.json file in the current directory
+  install     Installs specified package(s). If none, reinstalls all packages in ahkpm.json.
+  list        List all installed packages and their versions
+  update      Update package(s) to the latest version allowed by ahkpm.json
+  version     Bumps the version in ahkpm.json.
 
 Flags:
-  -h, --help   help for ahkpm
-
-Use "ahkpm [command] --help" for more information about a command.
+  -h, --help      help for ahkpm
+  -v, --version   Display the version of ahkpm and AutoHotkey
 ```
 
 ## Installation
@@ -58,6 +59,7 @@ ahkpm is being actively developed, but it is still a young project.
 As a result it has the following limitations.
 
 - It only supports hosting and downloading of packages on GitHub, though other git hosts will be supported in the future.
+- It does not (yet) handle problems with conflicting versions of transitive dependencies
 
 If you'd like to help remedy these limitations, consider contributing!
 

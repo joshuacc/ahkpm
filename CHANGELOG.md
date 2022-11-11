@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- ahkpm now supports version ranges such as `1.x.x`.
+- `ahkpm install` now makes the smallest possible change to the dependency tree
+- Added a new `ahkpm version` command to bump package version
+- `ahkpm install` now supports specifying multiple dependencies
+- Added support for `gh:` shorthand for GitHub dependencies in `ahkpm install` and `ahkpm update`
+- Added `ahkpm list` to display table of top level dependencies
+- The command to get the version of ahkpm has moved. Now use `ahkpm --version` instead of `ahkpm version`
+
 ## 0.4.0
 
 - Added `ahkpm update` to update package(s) to latest allowed version
