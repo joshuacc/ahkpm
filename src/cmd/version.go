@@ -17,7 +17,7 @@ var versionLong string
 
 var versionCmd = &cobra.Command{
 	Use:     "version [<newversion> | major | minor | patch]",
-	Short:   "Bumps the version in ahkpm.json.",
+	Short:   "Bumps the version in `ahkpm.json`.",
 	Long:    versionLong,
 	Example: "ahkpm version major",
 	Run: func(cmd *cobra.Command, args []string) {

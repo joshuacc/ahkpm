@@ -16,7 +16,7 @@ var updateCmd = &cobra.Command{
 	SuggestFor: []string{"upgrade"},
 	Short:      "Update package(s) to the latest version allowed by ahkpm.json",
 	Long:       updateLong,
-	Example:    "ahkpm update github.com/joshuacc/mock-ahkpm-package-a",
+	Example:    "ahkpm update github.com/joshuacc/fake-package\nahkpm update gh:joshuacc/fake-package",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("Please specify a package name")

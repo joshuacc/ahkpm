@@ -1,4 +1,5 @@
-Bumps the version in ahkpm.json.
+Bumps the version in `ahkpm.json`, making version updates easier than manually
+working out the version number and editing the file.
 
 `ahkpm version` should be called with a valid semantic version (such as `1.2.3`),
 or with one of `major`, `minor`, `patch`. In the second case, the existing 

@@ -3,15 +3,20 @@ package cmd
 import (
 	"ahkpm/src/constants"
 	utils "ahkpm/src/utils"
+	_ "embed"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
+//go:embed root-long.md
+var rootLong string
+
 var RootCmd = &cobra.Command{
 	Use:   "ahkpm",
-	Short: "The package manager for AutoHotkey",
+	Short: "The root command for the ahkpm CLI",
+	Long:  rootLong,
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	},
@@ -25,6 +30,7 @@ var RootCmd = &cobra.Command{
 			utils.Exit(err.Error())
 		}
 	},
+	DisableAutoGenTag: true,
 }
 
 func init() {
