@@ -1,0 +1,8 @@
+# Reinstalls all packages in ahkpm.json
+ahkpm install
+
+# Installs a specific version of a package
+ahkpm install github.com/joshuacc/fake-package@1.2.2
+
+# Installs the latest version matching major version 1
+ahkpm install gh:joshuacc/fake-package@1

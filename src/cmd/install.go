@@ -15,10 +15,14 @@ import (
 //go:embed install-long.md
 var installLong string
 
+//go:embed install-example.txt
+var installExample string
+
 var installCmd = &cobra.Command{
-	Use:   "install [<packageName>@<version>]...",
-	Short: "Installs specified package(s). If none, reinstalls all packages in ahkpm.json.",
-	Long:  installLong,
+	Use:     "install [<packageName>@<version>]...",
+	Short:   "Installs specified package(s). If none, reinstalls all packages in ahkpm.json.",
+	Long:    installLong,
+	Example: installExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		ahkpmFileExists, err := utils.FileExists(`ahkpm.json`)
 		invariant.AssertNoError(err)

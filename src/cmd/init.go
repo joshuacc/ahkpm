@@ -4,6 +4,7 @@ import (
 	core "ahkpm/src/core"
 	data "ahkpm/src/data"
 	utils "ahkpm/src/utils"
+	_ "embed"
 	"fmt"
 	"net/mail"
 	"net/url"
@@ -18,14 +19,14 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+//go:embed init-long.md
+var initLong string
+
 // TODO: Add colors to the prompt
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Interactively create an ahkpm.json file in the current directory",
-	Long: `Interactively create an ahkpm.json file in the current directory.
-
-Running "ahkpm init" will prompt you for information about your package and
-create an ahkpm.json file in the current directory.`,
+	Long:  initLong,
 	Run: func(cmd *cobra.Command, args []string) {
 		manifestExists, err := utils.FileExists("ahkpm.json")
 		if err != nil {

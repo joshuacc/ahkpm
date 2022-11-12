@@ -11,6 +11,7 @@ import (
 var cacheCleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clears the package cache",
+	Long:  "Clears the package cache, removing all downloaded packages. Sometimes useful in troubleshooting.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cleanCache()
 	},
