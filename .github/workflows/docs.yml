@@ -12,4 +12,6 @@ jobs:
 
     steps:
       - run: curl -X POST -d {} $AHKPM_DEV_BUILD_HOOK
+        env:
+          AHKPM_DEV_BUILD_HOOK: ${{ secrets.AHKPM_DEV_BUILD_HOOK }}
 
