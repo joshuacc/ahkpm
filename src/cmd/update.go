@@ -10,7 +10,6 @@ import (
 
 //go:embed update-long.md
 var updateLong string
-var all bool
 
 var updateCmd = &cobra.Command{
 	Use:        "update <packageName>...",
@@ -19,9 +18,9 @@ var updateCmd = &cobra.Command{
 	Long:       updateLong,
 	Example:    "ahkpm update github.com/joshuacc/fake-package\nahkpm update gh:joshuacc/fake-package",
 	Run: func(cmd *cobra.Command, args []string) {
-		deps := core.ManifestFromCwd().Dependencies
-		packages := GetDependencies(deps)
-		if all {
+		if cmd.Flag("all").Value.String() == "true" {
+			deps := core.ManifestFromCwd().Dependencies
+			packages := GetDependencies(deps)
 			installer := core.Installer{}
 			err := installer.Update(packages...)
 			if err != nil {
@@ -50,6 +49,6 @@ func GetDependencies(set core.DependencySet) []string {
 }
 
 func init() {
-	updateCmd.Flags().BoolVar(&all, "all", false, "updates all dependencies")
+	updateCmd.Flags().BoolP("all", "a", false, "Updates all dependencies and not recommended unless you have your script in version control")
 	RootCmd.AddCommand(updateCmd)
 }
