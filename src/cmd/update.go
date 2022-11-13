@@ -18,6 +18,16 @@ var updateCmd = &cobra.Command{
 	Long:       updateLong,
 	Example:    "ahkpm update github.com/joshuacc/fake-package\nahkpm update gh:joshuacc/fake-package",
 	Run: func(cmd *cobra.Command, args []string) {
+		if cmd.Flag("all").Value.String() == "true" {
+			deps := core.ManifestFromCwd().Dependencies
+			packages := GetDependencies(deps)
+			installer := core.Installer{}
+			err := installer.Update(packages...)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			return
+		}
 		if len(args) == 0 {
 			fmt.Println("Please specify a package name")
 			return
@@ -30,6 +40,15 @@ var updateCmd = &cobra.Command{
 	},
 }
 
+func GetDependencies(set core.DependencySet) []string {
+	var allPackages []string
+	for _, dep := range set.AsArray() {
+		allPackages = append(allPackages, dep.Name())
+	}
+	return allPackages
+}
+
 func init() {
+	updateCmd.Flags().BoolP("all", "a", false, "Updates all dependencies and not recommended unless you have your script in version control")
 	RootCmd.AddCommand(updateCmd)
 }
