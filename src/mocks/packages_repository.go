@@ -35,3 +35,8 @@ func (m *MockPackagesRepository) WithRemoveAll(removeAll func(path string) error
 	m.On("WithRemoveAll", removeAll).Return(m)
 	return m
 }
+
+func (m *MockPackagesRepository) GetLatestVersion(depName string) (Version, error) {
+	args := m.Called(depName)
+	return args.Get(0).(Version), args.Error(1)
+}

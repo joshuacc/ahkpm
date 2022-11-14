@@ -2,7 +2,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -37,25 +36,38 @@ func DependencyFromSpecifiers(name string, versionSpecifier string) (Dependency,
 		return nil, errors.New("Invalid dependency name " + name)
 	}
 
-	version, err := VersionFromSpecifier(versionSpecifier)
-	if err != nil {
-		return nil, err
+	dep := dependency{name: name}
+
+	if versionSpecifier == "" {
+		pr := NewPackagesRepository()
+		latestVersion, err := pr.GetLatestVersion(name)
+		if err != nil {
+			return nil, err
+		}
+		dep.version = latestVersion
+		// If we got back a semantic version, convert it to a range so that we
+		// will get the latest version on `ahkpm update` in the future
+		if latestVersion.Kind() == SemVerExact {
+			dep.version = NewVersion(SemVerRange, "^"+latestVersion.Value())
+		}
+	} else {
+		version, err := VersionFromSpecifier(versionSpecifier)
+		if err != nil {
+			return nil, err
+		}
+		dep.version = version
 	}
 
-	return dependency{
-		name:    name,
-		version: version,
-	}, nil
+	return dep, nil
 }
 
 func DependencyFromSpecifier(specifier string) (Dependency, error) {
-	if !strings.Contains(specifier, "@") {
-		return nil, fmt.Errorf("Invalid dependency specifier: %s", specifier)
-	}
-
 	splitSpecifier := strings.SplitN(specifier, "@", 2)
 	packageName := splitSpecifier[0]
-	versionSpecifier := splitSpecifier[1]
+	versionSpecifier := ""
+	if len(splitSpecifier) == 2 {
+		versionSpecifier = splitSpecifier[1]
+	}
 
 	return DependencyFromSpecifiers(packageName, versionSpecifier)
 }
