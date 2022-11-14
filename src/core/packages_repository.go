@@ -80,7 +80,7 @@ func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) (*D
 func (pr *packagesRepository) GetLatestVersion(depName string) (Version, error) {
 	dep, err := pr.getVersionMatchingSemVerRange(NewDependency(depName, NewVersion(SemVerRange, "*")))
 	if err != nil {
-		if err.Error() == "No matching version found" {
+		if err.Error() == "No matching versions found" {
 			if pr.HasBranch(depName, "main") {
 				return NewVersion(Branch, "main"), nil
 			}
@@ -99,8 +99,23 @@ func (pr *packagesRepository) HasBranch(depName string, branchName string) bool 
 	if err != nil {
 		return false
 	}
-	_, err = repo.Branch(branchName)
-	return err == nil
+
+	branchIter, err := repo.Branches()
+	if err != nil {
+		return false
+	}
+
+	hasMatchingBranch := false
+	err = branchIter.ForEach(func(branch *plumbing.Reference) error {
+		if branch.Name().Short() == branchName {
+			hasMatchingBranch = true
+		}
+		return nil
+	})
+	if err != nil {
+		return false
+	}
+	return hasMatchingBranch
 }
 
 func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, error) {
