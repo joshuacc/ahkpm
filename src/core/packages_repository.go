@@ -18,6 +18,7 @@ type PackagesRepository interface {
 	CopyPackage(dep ResolvedDependency, path string) error
 	GetPackageDependencies(dep ResolvedDependency) (*DependencySet, error)
 	GetResolvedDependencySHA(dep Dependency) (string, error)
+	GetLatestVersion(depName string) (Version, error)
 	ClearCache() error
 	// For testing
 	WithRemoveAll(removeAll func(path string) error) PackagesRepository
@@ -71,6 +72,35 @@ func (pr *packagesRepository) GetPackageDependencies(dep ResolvedDependency) (*D
 	}
 
 	return &deps, nil
+}
+
+// GetLatestVersion returns the latest semantic version of the package. If none are found,
+// it will fall back to "branch:main", and then to "branch:master". If none of these are
+// found, it will return an error.
+func (pr *packagesRepository) GetLatestVersion(depName string) (Version, error) {
+	dep, err := pr.getVersionMatchingSemVerRange(NewDependency(depName, NewVersion(SemVerRange, "*")))
+	if err != nil {
+		if err.Error() == "No matching version found" {
+			if pr.HasBranch(depName, "main") {
+				return NewVersion(Branch, "main"), nil
+			}
+			if pr.HasBranch(depName, "master") {
+				return NewVersion(Branch, "master"), nil
+			}
+		}
+		return nil, err
+	}
+	return dep.Version(), nil
+}
+
+// HasBranch returns true if the package has a branch with the given name
+func (pr *packagesRepository) HasBranch(depName string, branchName string) bool {
+	repo, _, err := pr.ensurePackageIsUpToDate(depName)
+	if err != nil {
+		return false
+	}
+	_, err = repo.Branch(branchName)
+	return err == nil
 }
 
 func (pr *packagesRepository) GetResolvedDependencySHA(dep Dependency) (string, error) {
