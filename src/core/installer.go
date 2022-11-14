@@ -23,6 +23,7 @@ func (i Installer) Install(newDeps DependencySet) {
 			}
 		}
 
+		fmt.Println("Installation complete.")
 		return
 	}
 	hasLockfile := err == nil
@@ -73,6 +74,8 @@ func (i Installer) Install(newDeps DependencySet) {
 		WithDependencies(manifest.Dependencies).
 		WithResolved(combinedDepTree).
 		SaveToCwd()
+
+	fmt.Println("Installation complete.")
 }
 
 func (i Installer) Update(packageNames ...string) error {
