@@ -3,6 +3,7 @@ package cmd
 import (
 	core "ahkpm/src/core"
 	data "ahkpm/src/data"
+	"ahkpm/src/invariant"
 	utils "ahkpm/src/utils"
 	_ "embed"
 	"fmt"
@@ -50,6 +51,7 @@ var initCmd = &cobra.Command{
 		manifest.Name = cwd
 		manifest.Version = "0.0.1"
 		manifest.License = "MIT"
+		manifest.Include = getDefaultInclude()
 
 		for {
 			manifest.Name = showPrompt(
@@ -112,6 +114,12 @@ var initCmd = &cobra.Command{
 				"What is the URL of the package's bug/issue tracker? (optional)",
 				makeOptional(validateUrl),
 				prompt.OptionInitialBufferText(manifest.IssueTracker),
+			)
+
+			manifest.Include = showPrompt(
+				"What is the primary file which users of this package should \"Include\" to use it in their scripts? (optional)",
+				validateNothing,
+				prompt.OptionInitialBufferText(manifest.Include),
 			)
 
 			manifest.License = showPrompt(
@@ -285,4 +293,17 @@ func makeOptional(validator Validator) Validator {
 
 		return validator(value)
 	}
+}
+
+// Gets the ahk files in the current working directory. If there is only one,
+// it is returned. Otherwise it returns an empty string.
+func getDefaultInclude() string {
+	ahkFiles, err := filepath.Glob("*.ahk")
+	invariant.AssertNoError(err)
+
+	if len(ahkFiles) == 1 {
+		return ahkFiles[0]
+	}
+
+	return ""
 }

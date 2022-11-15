@@ -107,3 +107,10 @@ func (ds DependencySet) AddDependenciesFromSpecifiers(depSpec []string) (Depende
 	}
 	return ds, nil
 }
+
+// Contains returns true if the set contains the dependency
+func (ds DependencySet) Contains(depName string) bool {
+	depName = CanonicalizeDependencyName(depName)
+	_, ok := ds._set[depName]
+	return ok
+}
