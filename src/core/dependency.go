@@ -1,6 +1,8 @@
 package core
 
 import (
+	"ahkpm/src/invariant"
+	. "ahkpm/src/service_locator"
 	"errors"
 	"regexp"
 	"strings"
@@ -28,7 +30,7 @@ func NewDependency(name string, version Version) Dependency {
 
 // DependencyFromSpecifiers creates a new dependency from the given name and
 // version specifier. It performs validation on both.
-func DependencyFromSpecifiers(name string, versionSpecifier string) (Dependency, error) {
+func DependencyFromSpecifiers(name string, versionSpecifier string, maybeLocator ...*ServiceLocator) (Dependency, error) {
 	name = CanonicalizeDependencyName(name)
 
 	isValidName := isValidDependencyName(name)
@@ -39,7 +41,8 @@ func DependencyFromSpecifiers(name string, versionSpecifier string) (Dependency,
 	dep := dependency{name: name}
 
 	if versionSpecifier == "" {
-		pr := NewPackagesRepository()
+		locator := GetServiceLocator(maybeLocator)
+		pr := locator.Get("PackagesRepository").(PackagesRepository)
 		latestVersion, err := pr.GetLatestVersion(name)
 		if err != nil {
 			return nil, err
@@ -86,9 +89,7 @@ func (d dependency) Equals(other Dependency) bool {
 
 func isValidDependencyName(name string) bool {
 	isMatch, err := regexp.MatchString(`^github\.com\/[\w-\.]+\/[\w-\.]+$`, name)
-	if err != nil {
-		panic(err)
-	}
+	invariant.AssertNoError(err)
 
 	return isMatch
 }

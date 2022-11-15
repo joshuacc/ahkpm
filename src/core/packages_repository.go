@@ -1,6 +1,8 @@
 package core
 
 import (
+	"ahkpm/src/invariant"
+	. "ahkpm/src/service_locator"
 	"ahkpm/src/utils"
 	"errors"
 	"fmt"
@@ -26,6 +28,11 @@ type PackagesRepository interface {
 
 type packagesRepository struct {
 	removeAll func(path string) error
+}
+
+func init() {
+	err := DefaultServiceLocator.Add("PackagesRepository", NewPackagesRepository())
+	invariant.AssertNoError(err)
 }
 
 func NewPackagesRepository() PackagesRepository {

@@ -2,6 +2,9 @@ package core_test
 
 import (
 	. "ahkpm/src/core"
+	"ahkpm/src/invariant"
+	"ahkpm/src/mocks"
+	"ahkpm/src/service_locator"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,6 +32,22 @@ func TestDependencyFromSpecifiersWithInvalidInputs(t *testing.T) {
 	dep2, err2 := DependencyFromSpecifiers("invalid", "branch:main")
 	assert.NotNil(t, err2)
 	assert.Nil(t, dep2)
+}
+
+func TestDependencyFromSpecifiersWithEmptyVersion(t *testing.T) {
+	mockPR := &mocks.MockPackagesRepository{}
+	mockPR.On("GetLatestVersion", "github.com/a/a").Return(NewVersion(SemVerExact, "1.33.7"), nil)
+
+	locator := service_locator.NewServiceLocator()
+	err := locator.Add("PackagesRepository", mockPR)
+	invariant.AssertNoError(err)
+
+	dep1, err1 := DependencyFromSpecifiers("github.com/a/a", "", locator)
+
+	expected := NewDependency("github.com/a/a", NewVersion(SemVerRange, "^1.33.7"))
+
+	assert.Nil(t, err1)
+	assert.Equal(t, expected, dep1)
 }
 
 func TestDependencyFromSpecifier(t *testing.T) {
