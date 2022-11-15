@@ -90,6 +90,8 @@ This file is where the user of ahkpm declares their dependencies and other packa
   "license": "MIT",
   // URL for users to file bugs/issues for the package
   "issueTracker": "github.com/user/my-project/issues",
+  // The primary file which users of the package should "Include" to use it in their scripts
+  "include": "example.ahk",
   // Information about the primary author of the package
   "author": {
     "name": "joshuacc",

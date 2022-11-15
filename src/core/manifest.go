@@ -15,6 +15,7 @@ type Manifest struct {
 	Website      string        `json:"website"`
 	License      string        `json:"license"`
 	IssueTracker string        `json:"issueTracker"`
+	Include      string        `json:"include"`
 	Author       Person        `json:"author"`
 	Dependencies DependencySet `json:"dependencies"`
 }
