@@ -17,7 +17,6 @@ func TestNewManifest(t *testing.T) {
 
 func TestMarshalJSON(t *testing.T) {
 	m := NewManifest()
-	m.Name = "ahkpm"
 	m.Version = "0.0.1"
 	m.Description = "A package manager for AutoHotkey"
 	m.Repository = "https://github.com/ahkpm/ahkpm"
@@ -35,7 +34,6 @@ func TestMarshalJSON(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected := `{
-		"name": "ahkpm",
 		"version": "0.0.1",
 		"description": "A package manager for AutoHotkey",
 		"repository": "https://github.com/ahkpm/ahkpm",
