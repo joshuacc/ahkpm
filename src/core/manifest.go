@@ -8,7 +8,6 @@ import (
 
 // Manifest contains the data from ahkpm.json
 type Manifest struct {
-	Name         string        `json:"name"`
 	Version      string        `json:"version"`
 	Description  string        `json:"description"`
 	Repository   string        `json:"repository"`

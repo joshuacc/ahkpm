@@ -79,7 +79,6 @@ This file is where the user of ahkpm declares their dependencies and other packa
 
 ```jsonc
 {
-  "name": "my-project",
   "version": "0.0.1",
   "description": "A brief description of what the package does",
   // URL for the package's git repository

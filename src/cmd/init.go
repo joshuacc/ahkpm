@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/mail"
 	"net/url"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -37,29 +36,13 @@ var initCmd = &cobra.Command{
 			utils.Exit("ahkpm.json already exists in this directory")
 		}
 
-		cwd, err := os.Getwd()
-		if err != nil {
-			fmt.Println("Unable to get current working directory")
-			return
-		}
-		cwd = filepath.Base(cwd)
-		cwd = strings.ToLower(cwd)
-		cwd = strings.Replace(cwd, " ", "-", -1)
-
 		// Initialize with default values
 		manifest := core.NewManifest()
-		manifest.Name = cwd
 		manifest.Version = "0.0.1"
 		manifest.License = "MIT"
 		manifest.Include = getDefaultInclude()
 
 		for {
-			manifest.Name = showPrompt(
-				"What is the name of your package?",
-				validateNothing,
-				prompt.OptionInitialBufferText(manifest.Name),
-			)
-
 			manifest.Version = showPrompt(
 				"What version is the package? (Using semantic versioning)",
 				validateSemver,
