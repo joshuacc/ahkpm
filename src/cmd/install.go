@@ -23,6 +23,7 @@ var installCmd = &cobra.Command{
 	Short:   "Installs specified package(s). If none, reinstalls all packages in ahkpm.json.",
 	Long:    installLong,
 	Example: installExample,
+	Aliases: []string{"i"},
 	Run: func(cmd *cobra.Command, args []string) {
 		ahkpmFileExists, err := utils.FileExists(`ahkpm.json`)
 		invariant.AssertNoError(err)
