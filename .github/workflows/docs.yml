@@ -2,8 +2,12 @@
 # it can rebuild with the latest version numbers, release links, etc.
 name: redeploy docs
 on: 
+  # Every time a new release occurs
   release:
     types: [released]
+  # Every day at midnight so that the ahkpm packages page is reasonably current
+  schedule:
+    - cron: "0 0 * * *" 
 
 jobs:
   build:
