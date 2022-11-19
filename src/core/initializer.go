@@ -243,8 +243,11 @@ func getDefaultRepository() string {
 			if err != nil {
 				panic(err)
 			}
-			domainAndPath := re.FindSubmatch(originUrl)[1]
-			return "https://" + string(domainAndPath)
+			submatchResults := re.FindSubmatch(originUrl)
+			if len(submatchResults) > 1 {
+				domainAndPath := submatchResults[1]
+				return "https://" + string(domainAndPath)
+			}
 		}
 	}
 
