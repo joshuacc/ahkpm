@@ -17,6 +17,7 @@ var updateCmd = &cobra.Command{
 	Short:      "Update package(s) to the latest version allowed by ahkpm.json",
 	Long:       updateLong,
 	Example:    "ahkpm update github.com/joshuacc/fake-package\nahkpm update gh:joshuacc/fake-package",
+	Aliases:    []string{"u"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if cmd.Flag("all").Value.String() == "true" {
 			deps := core.ManifestFromCwd().Dependencies
