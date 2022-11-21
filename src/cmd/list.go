@@ -2,6 +2,7 @@ package cmd
 
 import (
 	core "ahkpm/src/core"
+	"ahkpm/src/utils"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -37,18 +38,11 @@ func GetDependenciesForDisplay(set core.DependencySet) string {
 		}
 	}
 
-	output += rightPad("Name", " ", lengthOfLongestName) + "\tVersion\n"
-	output += rightPad("", "-", lengthOfLongestName) + "\t"
-	output += rightPad("", "-", lengthOfLongestVersion) + "\n"
+	output += utils.RightPad("Name", " ", lengthOfLongestName) + "\tVersion\n"
+	output += utils.RightPad("", "-", lengthOfLongestName) + "\t"
+	output += utils.RightPad("", "-", lengthOfLongestVersion) + "\n"
 	for _, dep := range set.AsArray() {
-		output = output + rightPad(dep.Name(), " ", lengthOfLongestName) + "\t" + dep.Version().String() + "\n"
+		output = output + utils.RightPad(dep.Name(), " ", lengthOfLongestName) + "\t" + dep.Version().String() + "\n"
 	}
 	return output
-}
-
-func rightPad(s string, char string, length int) string {
-	for len(s) < length {
-		s += char
-	}
-	return s
 }
