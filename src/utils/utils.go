@@ -75,3 +75,10 @@ func GetAutoHotkeyVersion() (string, error) {
 
 	return string(out), nil
 }
+
+func RightPad(s string, char string, length int) string {
+	for len(s) < length {
+		s += char
+	}
+	return s
+}
