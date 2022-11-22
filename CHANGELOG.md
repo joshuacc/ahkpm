@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0
+
+- Added `ahkpm search` command to find packages
+- Added `--defaults` flag for `ahkpm init` to allow bypassing prompts
+- Added `ahkpm u` as an alias for `ahkpm update`
+- Added `ahkpm i` as an alias for `ahkpm install`
+- Added `ahkpm include` command to automatically generate `#Include` directive
+- `ahkpm install` now supports omitting the version from packages
+- `ahkpm update` now supports the `--all` flag
+
 ## 0.5.0
 
 - ahkpm now supports version ranges such as `1.x.x`.
