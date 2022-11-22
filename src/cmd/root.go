@@ -22,9 +22,15 @@ var RootCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if cmd.Flag("version").Value.String() == "true" {
-			fmt.Print(GetVersions())
+			fmt.Print(constants.SelfVersion)
 			return
 		}
+
+		if cmd.Flag("ahk-version").Value.String() == "true" {
+			fmt.Print(GetAhkVersion())
+			return
+		}
+
 		err := cmd.Help()
 		if err != nil {
 			utils.Exit(err.Error())
@@ -34,7 +40,8 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.Flags().BoolP("version", "v", false, "Display the version of ahkpm and AutoHotkey")
+	RootCmd.Flags().BoolP("version", "v", false, "Display the version of ahkpm")
+	RootCmd.Flags().BoolP("ahk-version", "a", false, "Display the version of AutoHotkey")
 }
 
 func Execute() {
@@ -44,11 +51,10 @@ func Execute() {
 	}
 }
 
-func GetVersions() string {
-	versions := "     ahkpm: " + constants.SelfVersion + "\n"
+func GetAhkVersion() string {
 	ahkVersion, err := utils.GetAutoHotkeyVersion()
-	if err == nil {
-		versions = versions + "AutoHotkey: " + ahkVersion + "\n"
+	if err != nil {
+		utils.Exit(err.Error())
 	}
-	return versions
+	return ahkVersion
 }
