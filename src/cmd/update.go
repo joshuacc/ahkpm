@@ -50,6 +50,6 @@ func GetDependencies(set core.DependencySet) []string {
 }
 
 func init() {
-	updateCmd.Flags().BoolP("all", "a", false, "Updates all dependencies and not recommended unless you have your script in version control")
+	updateCmd.Flags().BoolP("all", "a", false, "Updates all dependencies")
 	RootCmd.AddCommand(updateCmd)
 }

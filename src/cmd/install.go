@@ -19,7 +19,7 @@ var installLong string
 var installExample string
 
 var installCmd = &cobra.Command{
-	Use:     "install [<packageName>@<version>]...",
+	Use:     "install [<dependency>]...",
 	Short:   "Installs specified package(s). If none, reinstalls all packages in ahkpm.json.",
 	Long:    installLong,
 	Example: installExample,
