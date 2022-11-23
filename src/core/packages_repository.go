@@ -6,6 +6,7 @@ import (
 	"ahkpm/src/utils"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"sort"
 	"strings"
@@ -53,7 +54,7 @@ func (pr *packagesRepository) CopyPackage(dep ResolvedDependency, path string) e
 	}
 	err = copy.Copy(pr.getPackageCacheDir(dep.Name), path, copy.Options{
 		// Skip the .git directory since it isn't needed at the destination
-		Skip: func(src string) (bool, error) {
+		Skip: func(srcInfo fs.FileInfo, src string, dest string) (bool, error) {
 			return strings.HasSuffix(src, ".git"), nil
 		},
 	})
