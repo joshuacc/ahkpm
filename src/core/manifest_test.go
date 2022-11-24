@@ -41,6 +41,7 @@ func TestMarshalJSON(t *testing.T) {
 		"license": "MIT",
 		"issueTracker": "https://github.com/ahkpm/ahkpm/issues",
 		"include": "",
+		"scripts": {},
 		"author": {
 			"name": "Thomas Aquinas",
 			"email": "angelicdoctor@example.com",

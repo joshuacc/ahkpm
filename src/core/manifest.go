@@ -8,15 +8,16 @@ import (
 
 // Manifest contains the data from ahkpm.json
 type Manifest struct {
-	Version      string        `json:"version"`
-	Description  string        `json:"description"`
-	Repository   string        `json:"repository"`
-	Website      string        `json:"website"`
-	License      string        `json:"license"`
-	IssueTracker string        `json:"issueTracker"`
-	Include      string        `json:"include"`
-	Author       Person        `json:"author"`
-	Dependencies DependencySet `json:"dependencies"`
+	Version      string            `json:"version"`
+	Description  string            `json:"description"`
+	Repository   string            `json:"repository"`
+	Website      string            `json:"website"`
+	License      string            `json:"license"`
+	IssueTracker string            `json:"issueTracker"`
+	Include      string            `json:"include"`
+	Author       Person            `json:"author"`
+	Scripts      map[string]string `json:"scripts"`
+	Dependencies DependencySet     `json:"dependencies"`
 }
 
 type Person struct {
@@ -28,6 +29,7 @@ type Person struct {
 func NewManifest() *Manifest {
 	return &Manifest{
 		Author:       Person{},
+		Scripts:      make(map[string]string),
 		Dependencies: NewDependencySet(),
 	}
 }
