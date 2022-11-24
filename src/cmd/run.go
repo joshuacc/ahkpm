@@ -14,7 +14,6 @@ import (
 //go:embed run-long.md
 var runLong string
 
-// TODO: Add colors to the prompt
 var runCmd = &cobra.Command{
 	Use:     "run <script>",
 	Short:   "Run user-defined scripts from ahkpm.json",
