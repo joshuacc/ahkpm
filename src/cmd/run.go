@@ -39,7 +39,7 @@ func RunScript(scriptName string) {
 
 	fmt.Println("> " + script)
 
-	scriptCmd := exec.Command("cmd", "/c", script)
+	scriptCmd := exec.Command("pwsh", "-c", script)
 
 	// Allow the script to use the current program's stdin, stdout, and stderr
 	scriptCmd.Stdout = os.Stdout
