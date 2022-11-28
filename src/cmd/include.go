@@ -45,7 +45,7 @@ var includeCmd = &cobra.Command{
 		}
 
 		includePath := strings.Replace(pkgPath, "/", `\`, -1) + pkgManifest.Include
-		includeStatement := "#Include, %A_ScriptDir%\\" + includePath
+		includeStatement := "#Include %A_ScriptDir%\\" + includePath
 		fileName := cmd.Flag("file").Value.String()
 		if fileName == "" {
 			fmt.Println(includeStatement)
