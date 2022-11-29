@@ -11,7 +11,7 @@ func TestGetNewManifestWithDefaults(t *testing.T) {
 	m := GetNewManifestWithDefaults()
 
 	assert.IsType(t, &Manifest{}, m)
-	assert.Equal(t, "0.0.1", m.Version)
+	assert.Equal(t, "1.0.0", m.Version)
 	assert.Equal(t, "", m.Description)
 	assert.Equal(t, "", m.Include)
 	assert.Equal(t, "MIT", m.License)

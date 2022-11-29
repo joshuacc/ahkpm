@@ -221,7 +221,7 @@ func makeOptional(validator Validator) Validator {
 func GetNewManifestWithDefaults() *Manifest {
 	manifest := NewManifest()
 
-	manifest.Version = "0.0.1"
+	manifest.Version = "1.0.0"
 	manifest.Include = getDefaultInclude()
 	manifest.Repository = getDefaultRepository()
 	manifest.Website = manifest.Repository
