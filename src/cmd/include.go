@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -45,8 +46,14 @@ var includeCmd = &cobra.Command{
 		}
 
 		includePath := strings.Replace(pkgPath, "/", `\`, -1) + pkgManifest.Include
-		includeStatement := "#Include %A_ScriptDir%\\" + includePath
+		includePrefix := "#Include %A_ScriptDir%\\"
 		fileName := cmd.Flag("file").Value.String()
+		relativePath, err := filepath.Rel(filepath.Dir(fileName), includePath)
+		if err != nil {
+			fmt.Println("Error getting relative path")
+			return
+		}
+		includeStatement := includePrefix + relativePath
 		if fileName == "" {
 			fmt.Println(includeStatement)
 		} else {
