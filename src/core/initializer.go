@@ -72,9 +72,13 @@ func (i Initializer) InitInteractively() {
 			prompt.OptionInitialBufferText(manifest.Include),
 		)
 
+		licenseList := data.GetSpdxLicenseIds()
+		licenseList = append(licenseList, "UNLICENSED")
 		manifest.License = showPrompt(
-			"What license is the package released under? (MIT, Apache, etc.) Must either be a valid SPDX license identifier or \"UNLICENSED\".",
-			buildValidatorFromList(data.GetSpdxLicenseIds()),
+			"What license is the package released under? (MIT, Apache, etc.)\n"+
+				"See https://spdx.org/licenses/ for a list of valid license IDs.\n"+
+				"If you do not wish to license the package, enter \"UNLICENSED\".",
+			buildValidatorFromList(licenseList),
 			prompt.OptionInitialBufferText(manifest.License),
 		)
 
