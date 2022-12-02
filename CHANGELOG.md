@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0
+
+- Fixed a bug where `ahkpm init` did not allow the value `"UNLICENSED"`. Added clarifying text, and changed the value to `"NO LICENSE"` to distinguish it from the license named "The Unlicense."
+- `ahkpm init` now defaults the `version` field to `1.0.0` to avoid the unintuitive behavior of `0.x.x` versions
+- `ahkpm include` now correctly calculates relative script paths when the `--file` flag points to a file in a different folder
+- Made `ahkpm include` output compatible with AutoHotkey 2
+- Added support for ahkpm scripts to be stored in the `scripts` object in `ahkpm.json`
+- The AutoHotkey version is no longer reported by `--version`, but is available with `--ahk-version`.
+
 ## 0.6.0
 
 - Added `ahkpm search` command to find packages
