@@ -35,6 +35,6 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	initCmd.Flags().BoolP("defaults", "d", false, "Create a an ahkpm.json file with default values. No prompts.")
+	initCmd.Flags().BoolP("defaults", "d", false, "Create an ahkpm.json file with default values. No prompts.")
 	RootCmd.AddCommand(initCmd)
 }
