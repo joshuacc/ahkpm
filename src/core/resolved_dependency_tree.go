@@ -66,6 +66,17 @@ func (r ResolvedDependencyTree) Merge(other ResolvedDependencyTree) ResolvedDepe
 	return r
 }
 
+// RemoveTopLevelDependencies removes the given dependencies from the top level of the tree
+func (r ResolvedDependencyTree) RemoveTopLevelDependencies(depNames []string) ResolvedDependencyTree {
+	newTree := make(ResolvedDependencyTree, 0)
+	for _, depNode := range r {
+		if !slices.Contains(depNames, depNode.Value.Name) {
+			newTree = append(newTree, depNode)
+		}
+	}
+	return newTree
+}
+
 func getRelativeInstallPath(n TreeNode[ResolvedDependency]) string {
 	path := n.Value.Name
 	parent := n.Parent

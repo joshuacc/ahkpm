@@ -97,6 +97,22 @@ func (ds DependencySet) AddDependencies(newDeps []Dependency) DependencySet {
 	return ds
 }
 
+// RemoveDependencies removes the dependencies from the set
+func (ds DependencySet) RemoveDependencies(deps []Dependency) DependencySet {
+	for _, dep := range deps {
+		delete(ds._set, dep.Name())
+	}
+	return ds
+}
+
+// RemoveDependenciesByName removes the dependencies from the set
+func (ds DependencySet) RemoveDependenciesByName(depNames []string) DependencySet {
+	for _, name := range depNames {
+		delete(ds._set, name)
+	}
+	return ds
+}
+
 func (ds DependencySet) AddDependenciesFromSpecifiers(depSpec []string) (DependencySet, error) {
 	for _, dep := range depSpec {
 		dep, err := DependencyFromSpecifier(dep)

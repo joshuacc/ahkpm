@@ -78,6 +78,36 @@ func (i Installer) Install(newDeps DependencySet) {
 	fmt.Println("Installation complete.")
 }
 
+func (i Installer) Uninstall(depNames []string) {
+	manifest := ManifestFromCwd()
+	manifest.Dependencies.RemoveDependenciesByName(depNames)
+	manifest.SaveToCwd()
+
+	lm, err := LockManifestFromCwd()
+	if err != nil {
+		utils.Exit(err.Error())
+	}
+
+	resolvedDepTree := ResolvedDependencyTreeFromArray(lm.Resolved)
+	updatedResolved := resolvedDepTree.RemoveTopLevelDependencies(depNames)
+
+	os.RemoveAll("ahkpm-modules")
+	err = updatedResolved.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
+		resolvedDep := resolvedDepNode.Value
+		return NewPackagesRepository().CopyPackage(resolvedDep, resolvedDep.InstallPath)
+	})
+	if err != nil {
+		utils.Exit(err.Error())
+	}
+
+	NewLockManifest().
+		WithDependencies(manifest.Dependencies).
+		WithResolved(updatedResolved).
+		SaveToCwd()
+
+	fmt.Println("Uninstallation complete.")
+}
+
 func (i Installer) Update(packageNames ...string) error {
 	depsToUpdate := NewDependencySet()
 	currentDeps := ManifestFromCwd().Dependencies.AsMap()
