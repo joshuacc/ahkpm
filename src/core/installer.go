@@ -58,14 +58,7 @@ func (i Installer) Install(newDeps DependencySet) {
 		utils.Exit(err.Error())
 	}
 
-	os.RemoveAll("ahkpm-modules")
-	err = combinedDepTree.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
-		resolvedDep := resolvedDepNode.Value
-		return pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
-	})
-	if err != nil {
-		utils.Exit(err.Error())
-	}
+	i.copyResolved(combinedDepTree)
 
 	manifest.Dependencies.AddDependencies(newDeps.AsArray())
 	manifest.SaveToCwd()
@@ -81,28 +74,21 @@ func (i Installer) Install(newDeps DependencySet) {
 func (i Installer) Uninstall(depNames []string) {
 	manifest := ManifestFromCwd()
 	manifest.Dependencies.RemoveDependenciesByName(depNames)
-	manifest.SaveToCwd()
 
 	lm, err := LockManifestFromCwd()
 	if err != nil {
 		utils.Exit(err.Error())
 	}
 
-	resolvedDepTree := ResolvedDependencyTreeFromArray(lm.Resolved)
-	updatedResolved := resolvedDepTree.RemoveTopLevelDependencies(depNames)
+	resolvedDepTree := ResolvedDependencyTreeFromArray(lm.Resolved).RemoveTopLevelDependencies(depNames)
 
-	os.RemoveAll("ahkpm-modules")
-	err = updatedResolved.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
-		resolvedDep := resolvedDepNode.Value
-		return NewPackagesRepository().CopyPackage(resolvedDep, resolvedDep.InstallPath)
-	})
-	if err != nil {
-		utils.Exit(err.Error())
-	}
+	i.copyResolved(resolvedDepTree)
+
+	manifest.SaveToCwd()
 
 	NewLockManifest().
 		WithDependencies(manifest.Dependencies).
-		WithResolved(updatedResolved).
+		WithResolved(resolvedDepTree).
 		SaveToCwd()
 
 	fmt.Println("Uninstallation complete.")
@@ -151,18 +137,7 @@ func (i Installer) Update(packageNames ...string) error {
 		return err
 	}
 
-	// Empty ahkpm-modules
-	os.RemoveAll("ahkpm-modules")
-
-	// Copy new resolved deps to ahkpm-modules
-	pr := NewPackagesRepository()
-	err = oldResolved.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
-		resolvedDep := resolvedDepNode.Value
-		return pr.CopyPackage(resolvedDep, resolvedDep.InstallPath)
-	})
-	if err != nil {
-		return err
-	}
+	i.copyResolved(oldResolved)
 
 	// Save lockfile
 	NewLockManifest().
@@ -171,4 +146,15 @@ func (i Installer) Update(packageNames ...string) error {
 		SaveToCwd()
 
 	return nil
+}
+
+func (i Installer) copyResolved(resolved ResolvedDependencyTree) {
+	os.RemoveAll("ahkpm-modules")
+	err := resolved.ForEach(func(resolvedDepNode TreeNode[ResolvedDependency]) error {
+		resolvedDep := resolvedDepNode.Value
+		return NewPackagesRepository().CopyPackage(resolvedDep, resolvedDep.InstallPath)
+	})
+	if err != nil {
+		utils.Exit(err.Error())
+	}
 }
