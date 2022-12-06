@@ -3,7 +3,7 @@ module ahkpm
 go 1.19
 
 require (
-	github.com/Masterminds/semver/v3 v3.1.1
+	github.com/Masterminds/semver/v3 v3.2.0
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/go-git/go-git/v5 v5.5.0
 	github.com/magefile/mage v1.14.0
