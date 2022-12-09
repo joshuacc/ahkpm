@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cacheCmd = &cobra.Command{
+var CacheCmd = &cobra.Command{
 	Use:   "cache",
 	Short: "Manipulates the packages cache",
 	Long: "Provides subcommands to manipulate the packages cache. The cache is a" +
@@ -12,5 +12,5 @@ var cacheCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(cacheCmd)
+	RootCmd.AddCommand(CacheCmd)
 }
