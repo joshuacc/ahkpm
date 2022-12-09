@@ -1,2 +1,5 @@
 bin
 coverage.out
+ahkpm.json
+ahkpm.lock
+ahkpm-modules
