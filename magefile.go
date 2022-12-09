@@ -38,6 +38,7 @@ func Test() error {
 		"-covermode", "atomic",
 		"-coverprofile", "coverage.out",
 		"-timeout", "30s",
+		"-coverpkg", "./...",
 		"-cover",
 		"./...",
 	)
