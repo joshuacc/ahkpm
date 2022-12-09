@@ -11,7 +11,7 @@ import (
 //go:embed update-long.md
 var updateLong string
 
-var updateCmd = &cobra.Command{
+var UpdateCmd = &cobra.Command{
 	Use:        "update <packageName>...",
 	SuggestFor: []string{"upgrade"},
 	Short:      "Update package(s) to the latest version allowed by ahkpm.json",
@@ -50,6 +50,6 @@ func GetDependencies(set core.DependencySet) []string {
 }
 
 func init() {
-	updateCmd.Flags().BoolP("all", "a", false, "Updates all dependencies")
-	RootCmd.AddCommand(updateCmd)
+	UpdateCmd.Flags().BoolP("all", "a", false, "Updates all dependencies")
+	RootCmd.AddCommand(UpdateCmd)
 }

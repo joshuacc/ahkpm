@@ -12,7 +12,7 @@ import (
 var initLong string
 
 // TODO: Add colors to the prompt
-var initCmd = &cobra.Command{
+var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Interactively create an ahkpm.json file in the current directory",
 	Long:  initLong,
@@ -35,6 +35,6 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	initCmd.Flags().BoolP("defaults", "d", false, "Create an ahkpm.json file with default values. No prompts.")
-	RootCmd.AddCommand(initCmd)
+	InitCmd.Flags().BoolP("defaults", "d", false, "Create an ahkpm.json file with default values. No prompts.")
+	RootCmd.AddCommand(InitCmd)
 }
