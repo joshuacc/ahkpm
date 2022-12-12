@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cacheCleanCmd = &cobra.Command{
+var CacheCleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clears the package cache",
 	Long:  "Clears the package cache, removing all downloaded packages. Sometimes useful in troubleshooting.",
@@ -18,7 +18,7 @@ var cacheCleanCmd = &cobra.Command{
 }
 
 func init() {
-	cacheCmd.AddCommand(cacheCleanCmd)
+	CacheCmd.AddCommand(CacheCleanCmd)
 }
 
 func cleanCache() {
