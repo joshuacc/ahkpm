@@ -145,6 +145,11 @@ func (i Installer) Update(packageNames ...string) error {
 		WithResolved(oldResolved).
 		SaveToCwd()
 
+	fmt.Println("Update completed:")
+	for index,element := range lm.Resolved {
+		fmt.Printf(" %2d - %s * Version: .%s", index + 1, element.Name, element.Version)
+	}
+
 	return nil
 }
 
